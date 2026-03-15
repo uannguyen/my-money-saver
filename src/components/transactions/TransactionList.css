@@ -1,0 +1,47 @@
+.txn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.txn-day-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.txn-day-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.txn-day-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.txn-day-total {
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+.txn-day-total.income {
+  color: var(--color-income);
+}
+
+.txn-day-total.expense {
+  color: var(--color-expense);
+}
+
+.txn-day-items {
+  padding: 4px 0;
+}
+
+.txn-day-items .txn-item + .txn-item {
+  border-top: 1px solid var(--color-border-light);
+}

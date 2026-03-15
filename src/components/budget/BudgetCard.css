@@ -1,0 +1,58 @@
+.budget-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.budget-card-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.budget-card-icon {
+  font-size: 1.5rem;
+}
+
+.budget-card-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.budget-card-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.budget-card-btn {
+  padding: 4px 8px !important;
+  font-size: 0.875rem;
+}
+
+.budget-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.budget-card-spent {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.budget-card-remaining {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-income);
+}
+
+.budget-card-remaining.over {
+  color: var(--color-expense);
+}

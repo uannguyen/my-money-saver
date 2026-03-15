@@ -1,0 +1,16 @@
+.budget-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.budget-add-btn {
+  width: 100%;
+  margin-top: 16px;
+}
+
+.budget-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}

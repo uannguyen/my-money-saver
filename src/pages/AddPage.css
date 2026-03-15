@@ -1,0 +1,16 @@
+.add-page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0 16px;
+}
+
+.add-page-title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.add-page-form {
+  padding: 20px;
+}

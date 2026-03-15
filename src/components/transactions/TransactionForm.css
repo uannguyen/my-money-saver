@@ -1,0 +1,48 @@
+.txn-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.txn-form-amount-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 16px 0;
+  border-bottom: 2px solid var(--color-border-light);
+}
+
+.txn-form-currency {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.txn-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.txn-form-label {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.txn-form-note {
+  resize: none;
+}
+
+.txn-form-actions {
+  display: flex;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.txn-form-submit {
+  flex: 1;
+}

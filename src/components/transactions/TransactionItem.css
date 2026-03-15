@@ -1,0 +1,99 @@
+.txn-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.txn-item:hover {
+  background: var(--color-surface-hover);
+}
+
+.txn-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.txn-item-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.txn-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.txn-item-category {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.txn-item-note {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.txn-item-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.txn-item-amount {
+  font-size: 0.9375rem;
+  font-weight: 700;
+}
+
+.txn-item-amount.expense {
+  color: var(--color-expense);
+}
+
+.txn-item-amount.income {
+  color: var(--color-income);
+}
+
+.txn-item-delete {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+}
+
+.txn-item:hover .txn-item-delete {
+  opacity: 1;
+}
+
+.txn-item-delete:hover {
+  background: var(--color-expense-bg);
+  color: var(--color-expense);
+}
+
+/* On mobile, always show delete button */
+@media (hover: none) {
+  .txn-item-delete {
+    opacity: 0.6;
+  }
+}

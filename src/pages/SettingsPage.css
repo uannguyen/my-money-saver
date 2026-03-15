@@ -1,0 +1,101 @@
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-section-title {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.settings-account {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid var(--color-border-light);
+}
+
+.settings-account-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-account-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+
+.settings-account-email {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.settings-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.settings-cat-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-cat-group-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.settings-cat-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.settings-cat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+}
+
+.settings-desc {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.settings-logout {
+  width: 100%;
+  margin-top: 8px;
+}
+
+.settings-version {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  padding: 8px 0;
+}

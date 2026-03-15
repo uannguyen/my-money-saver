@@ -1,0 +1,91 @@
+.stats-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.stats-overview {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.stats-overview-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.stats-overview-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+}
+
+.stats-overview-value {
+  font-size: 1.125rem;
+  font-weight: 800;
+}
+
+.stats-overview-value.income {
+  color: var(--color-income);
+}
+
+.stats-overview-value.expense {
+  color: var(--color-expense);
+}
+
+.stats-overview-divider {
+  width: 1px;
+  height: 40px;
+  background: var(--color-border);
+}
+
+.top-categories {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.top-cat-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+}
+
+.top-cat-item + .top-cat-item {
+  border-top: 1px solid var(--color-border-light);
+}
+
+.top-cat-rank {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+}
+
+.top-cat-icon {
+  font-size: 1.25rem;
+}
+
+.top-cat-name {
+  flex: 1;
+  font-weight: 500;
+  font-size: 0.9375rem;
+}
+
+.top-cat-amount {
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-expense);
+}

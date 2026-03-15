@@ -1,11 +1,12 @@
-import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTransactions } from '../hooks/useTransactions'
 import { Header } from '../components/layout/Header'
+import { CategoryManager } from '../components/categories/CategoryManager'
 import { logOut } from '../services/authService'
 import { exportToExcel } from '../utils/exportExcel'
 import { ALL_DEFAULT_CATEGORIES } from '../constants/categories'
 import { getMonthKey } from '../utils/dateHelpers'
+import { useState } from 'react'
 import toast from 'react-hot-toast'
 import './SettingsPage.css'
 
@@ -22,7 +23,7 @@ export function SettingsPage() {
     try {
       exportToExcel(transactions, ALL_DEFAULT_CATEGORIES, `chi-tieu-${monthKey}`)
       toast.success('Đã xuất file Excel')
-    } catch (err) {
+    } catch {
       toast.error('Xuất file thất bại')
     }
   }
@@ -62,31 +63,10 @@ export function SettingsPage() {
           </div>
         </div>
 
-        {/* Default Categories */}
+        {/* Category Manager */}
         <div className="card settings-section animate-fade-in-up">
-          <h3 className="settings-section-title">Danh mục mặc định</h3>
-          <div className="settings-categories">
-            <div className="settings-cat-group">
-              <span className="settings-cat-group-label">Chi tiêu</span>
-              <div className="settings-cat-list">
-                {ALL_DEFAULT_CATEGORIES.filter((c) => c.type === 'expense').map((c) => (
-                  <span key={c.id} className="settings-cat-chip">
-                    {c.icon} {c.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="settings-cat-group">
-              <span className="settings-cat-group-label">Thu nhập</span>
-              <div className="settings-cat-list">
-                {ALL_DEFAULT_CATEGORIES.filter((c) => c.type === 'income').map((c) => (
-                  <span key={c.id} className="settings-cat-chip">
-                    {c.icon} {c.name}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
+          <h3 className="settings-section-title">Quản lý danh mục</h3>
+          <CategoryManager />
         </div>
 
         {/* Export */}

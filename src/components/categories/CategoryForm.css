@@ -32,6 +32,31 @@
   color: var(--text-base);
 }
 
+/* Preview */
+.category-preview {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 6px;
+  padding: 16px;
+  margin-bottom: 4px;
+  background: var(--color-bg);
+  border-radius: var(--radius-md);
+}
+
+.category-preview-icon {
+  font-size: 2.5rem;
+  line-height: 1;
+}
+
+.category-preview-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+
 .close-btn {
   background: none;
   border: none;

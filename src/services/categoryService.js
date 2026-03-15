@@ -1,14 +1,21 @@
 import {
   collection,
   addDoc,
+  updateDoc,
+  deleteDoc,
   query,
   getDocs,
+  doc,
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
 
 function getCategoriesRef(userId) {
   return collection(db, 'users', userId, 'categories')
+}
+
+function getCategoryDoc(userId, id) {
+  return doc(db, 'users', userId, 'categories', id)
 }
 
 /**
@@ -24,6 +31,28 @@ export async function addCustomCategory(userId, data) {
   }
   const docRef = await addDoc(ref, docData)
   return { id: docRef.id, ...docData }
+}
+
+/**
+ * Update an existing custom category
+ */
+export async function updateCustomCategory(userId, id, data) {
+  const ref = getCategoryDoc(userId, id)
+  const updateData = {
+    name: data.name,
+    icon: data.icon,
+    updatedAt: Timestamp.now(),
+  }
+  await updateDoc(ref, updateData)
+  return { id, ...updateData }
+}
+
+/**
+ * Delete a custom category
+ */
+export async function deleteCustomCategory(userId, id) {
+  const ref = getCategoryDoc(userId, id)
+  await deleteDoc(ref)
 }
 
 /**

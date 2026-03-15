@@ -1,21 +1,35 @@
-import { useState } from 'react'
-import { Plus, X } from 'lucide-react'
-import { addCustomCategory } from '../../services/categoryService'
-import { useAuth } from '../../contexts/AuthContext'
+import { useState, useEffect } from 'react'
+import { X } from 'lucide-react'
 import toast from 'react-hot-toast'
 import './CategoryForm.css'
 
 const ICONS = [
-  '🛒', '🚗', '🏠', '📱', '👕', '🏥', '🎉', '✈️', '🎁', '🐶',
-  '🎓', '💼', '💡', '🍔', '☕', '🍺', '⚽', '🎸', '🎮', '🛠️',
-  '💰', '📈', '🏦', '💎', '🏅', '🧾', '💸', '💳', '💵', '🪙'
+  '🍜', '🛵', '🛍️', '🏠', '🏥', '🎮', '📚', '👨‍👩‍👦', '🎉', '📦',
+  '💼', '💻', '🎁', '🤝', '💰', '🛒', '🚗', '📱', '👕', '✈️',
+  '🐶', '🎓', '🍔', '☕', '🍺', '⚽', '🎸', '🛠️', '💎', '🧾',
+  '💸', '💳', '💵', '🪙', '📈', '🏦', '🎵', '📷', '🌿', '💊',
 ]
 
-export function CategoryForm({ type, onAdded, onClose }) {
-  const { user } = useAuth()
-  const [name, setName] = useState('')
-  const [icon, setIcon] = useState(ICONS[0])
+/**
+ * CategoryForm - dùng cho cả Thêm mới và Chỉnh sửa
+ * Props:
+ *   type         - 'expense' | 'income'
+ *   editingCat   - category đang sửa (null nếu thêm mới)
+ *   onSave(data) - callback khi lưu thành công
+ *   onClose()    - callback đóng modal
+ */
+export function CategoryForm({ type, editingCat, onSave, onClose }) {
+  const isEditing = !!editingCat
+  const [name, setName] = useState(editingCat?.name || '')
+  const [icon, setIcon] = useState(editingCat?.icon || ICONS[0])
   const [submitting, setSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (editingCat) {
+      setName(editingCat.name)
+      setIcon(editingCat.icon)
+    }
+  }, [editingCat])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -23,32 +37,35 @@ export function CategoryForm({ type, onAdded, onClose }) {
 
     setSubmitting(true)
     try {
-      await addCustomCategory(user.uid, {
-        name: name.trim(),
-        icon,
-        type
-      })
-      toast.success('Đã thêm danh mục mới')
-      onAdded()
+      await onSave({ name: name.trim(), icon, type })
+      toast.success(isEditing ? 'Đã cập nhật danh mục' : 'Đã thêm danh mục mới')
       onClose()
     } catch (err) {
-      toast.error('Lỗi khi thêm danh mục: ' + err.message)
+      toast.error('Lỗi: ' + err.message)
     } finally {
       setSubmitting(false)
     }
   }
 
+  const typeLabel = type === 'expense' ? 'chi tiêu' : 'thu nhập'
+
   return (
-    <div className="category-modal-overlay">
+    <div className="category-modal-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="category-modal">
         <div className="category-modal-header">
-          <h3>Thêm danh mục {type === 'expense' ? 'chi tiêu' : 'thu nhập'}</h3>
+          <h3>{isEditing ? 'Chỉnh sửa' : 'Thêm'} danh mục {typeLabel}</h3>
           <button type="button" className="close-btn" onClick={onClose}>
             <X size={20} />
           </button>
         </div>
-        
+
         <form onSubmit={handleSubmit} className="category-form">
+          {/* Preview */}
+          <div className="category-preview">
+            <span className="category-preview-icon">{icon}</span>
+            <span className="category-preview-name">{name || 'Tên danh mục'}</span>
+          </div>
+
           <div className="category-form-section">
             <label>Tên danh mục</label>
             <input
@@ -56,7 +73,7 @@ export function CategoryForm({ type, onAdded, onClose }) {
               className="input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="VD: Tiền điện thoại..."
+              placeholder="VD: Cà phê, Internet..."
               maxLength={30}
               required
               autoFocus
@@ -66,7 +83,7 @@ export function CategoryForm({ type, onAdded, onClose }) {
           <div className="category-form-section">
             <label>Chọn biểu tượng</label>
             <div className="icon-grid">
-              {ICONS.map(i => (
+              {ICONS.map((i) => (
                 <button
                   key={i}
                   type="button"
@@ -84,7 +101,7 @@ export function CategoryForm({ type, onAdded, onClose }) {
               Hủy
             </button>
             <button type="submit" className="btn btn-primary" disabled={!name.trim() || submitting}>
-              {submitting ? 'Đang lưu...' : 'Thêm danh mục'}
+              {submitting ? 'Đang lưu...' : isEditing ? 'Lưu thay đổi' : 'Thêm danh mục'}
             </button>
           </div>
         </form>

@@ -1,37 +1,44 @@
 import { useState, useEffect } from 'react'
-import { getTodayString, getTodayDateTimeString } from '../../utils/dateHelpers'
+import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
-import {
-  DEFAULT_EXPENSE_CATEGORIES,
-  DEFAULT_INCOME_CATEGORIES,
-} from '../../constants/categories'
-import { CategoryForm } from '../categories/CategoryForm'
-import { Plus } from 'lucide-react'
+import { useCategories } from '../../hooks/useCategories'
+import { CategoryPicker } from './CategoryPicker'
+import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
 import './TransactionForm.css'
 
+// ─── Persist last-used datetime across consecutive transactions ─────────────
+const STORAGE_KEY = 'txn_last_datetime'
+
+function getInitialDateTime(initial) {
+  if (initial?.date) {
+    return new Date(initial.date).toISOString().slice(0, 16)
+  }
+  const stored = sessionStorage.getItem(STORAGE_KEY)
+  return stored || getTodayDateTimeString()
+}
+
+function saveLastDateTime(dt) {
+  sessionStorage.setItem(STORAGE_KEY, dt)
+}
+
 export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit, onCancel }) {
+  const { parents, categories: allCats } = useCategories()
   const [type, setType] = useState(initial?.type || 'expense')
-  const [showCategoryForm, setShowCategoryForm] = useState(false)
+  const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [amountStr, setAmountStr] = useState(
     initial?.amount ? formatVND(initial.amount).replace('đ', '') : ''
   )
   const [categoryId, setCategoryId] = useState(initial?.categoryId || '')
-  const [date, setDate] = useState(
-    initial?.date
-      ? new Date(initial.date).toISOString().slice(0, 16)
-      : getTodayDateTimeString()
-  )
+  const [date, setDate] = useState(() => getInitialDateTime(initial))
   const [note, setNote] = useState(initial?.note || '')
   const [submitting, setSubmitting] = useState(false)
 
-  const allCategories = categories || []
-  const filteredCategories = allCategories.filter(
-    (c) => c.type === type || c.type === 'both'
-  )
+  // Find selected category info for display
+  const selectedCat = allCats.find((c) => c.id === categoryId) || null
 
   // Reset categoryId when type changes if current selection doesn't match
   useEffect(() => {
-    if (categoryId && !filteredCategories.find((c) => c.id === categoryId)) {
+    if (selectedCat && selectedCat.type !== type) {
       setCategoryId('')
     }
   }, [type])
@@ -46,6 +53,10 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     setAmountStr(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'))
   }
 
+  const setCurrentTime = () => {
+    setDate(getTodayDateTimeString())
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     const amount = parseVND(amountStr)
@@ -53,6 +64,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
 
     setSubmitting(true)
     try {
+      saveLastDateTime(date) // persist for next transaction
       await onSubmit({
         type,
         amount,
@@ -64,6 +76,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
       setSubmitting(false)
     }
   }
+
+  // Format date for display
+  const dateObj = new Date(date)
+  const displayDate = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`
+  const displayTime = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`
 
   return (
     <form className="txn-form" onSubmit={handleSubmit}>
@@ -99,49 +116,89 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <span className="txn-form-currency">đ</span>
       </div>
 
-      {/* Category Grid */}
+      {/* Category Selector (tap to open picker) */}
       <div className="txn-form-section">
         <label className="txn-form-label">Danh mục</label>
-        <div className="category-grid">
-          {filteredCategories.map((cat) => (
-            <button
-              key={cat.id}
-              type="button"
-              className={`category-item ${categoryId === cat.id ? 'selected' : ''}`}
-              onClick={() => setCategoryId(cat.id)}
-            >
-              <span className="emoji">{cat.icon}</span>
-              <span className="label">{cat.name}</span>
-            </button>
-          ))}
-          <button
-            type="button"
-            className="category-item add-category-btn"
-            onClick={() => setShowCategoryForm(true)}
-          >
-            <span className="emoji"><Plus size={20} /></span>
-            <span className="label">Thêm</span>
-          </button>
-        </div>
+        <button
+          type="button"
+          className={`txn-cat-selector ${selectedCat ? 'has-value' : ''}`}
+          onClick={() => setShowCategoryPicker(true)}
+        >
+          {selectedCat ? (
+            <>
+              <span className="txn-cat-icon">{selectedCat.icon}</span>
+              <div className="txn-cat-info">
+                <span className="txn-cat-name">{selectedCat.name}</span>
+                <span className="txn-cat-parent">{selectedCat.parentName}</span>
+              </div>
+            </>
+          ) : (
+            <span className="txn-cat-placeholder">Chọn danh mục</span>
+          )}
+          <ChevronRight size={18} className="txn-cat-chevron" />
+        </button>
       </div>
 
-      {showCategoryForm && (
-        <CategoryForm
+      {showCategoryPicker && (
+        <CategoryPicker
           type={type}
-          onAdded={onCategoryAdded}
-          onClose={() => setShowCategoryForm(false)}
+          selectedId={categoryId}
+          onSelect={(sub) => {
+            setCategoryId(sub.id)
+            setShowCategoryPicker(false)
+          }}
+          onClose={() => setShowCategoryPicker(false)}
         />
       )}
 
-      {/* Date */}
+      {/* Date & Time */}
       <div className="txn-form-section">
         <label className="txn-form-label">Ngày giờ</label>
-        <input
-          type="datetime-local"
-          className="input"
-          value={date}
-          onChange={(e) => setDate(e.target.value)}
-        />
+        <div className="txn-datetime-row">
+          <div className="txn-datetime-input-wrapper">
+            <CalendarDays size={16} className="txn-datetime-icon" />
+            <input
+              type="date"
+              className="txn-date-input"
+              value={date.slice(0, 10)}
+              onChange={(e) => setDate(e.target.value + 'T' + date.slice(11, 16))}
+            />
+          </div>
+          <div className="txn-datetime-input-wrapper">
+            <Clock size={16} className="txn-datetime-icon" />
+            <div className="txn-time-input custom-time-picker">
+              <select
+                className="txn-time-select"
+                value={date.slice(11, 13)}
+                onChange={(e) => setDate(date.slice(0, 10) + 'T' + e.target.value + ':' + date.slice(14, 16))}
+              >
+                {Array.from({ length: 24 }).map((_, i) => {
+                  const h = String(i).padStart(2, '0')
+                  return <option key={h} value={h}>{h}</option>
+                })}
+              </select>
+              <span className="txn-time-separator">:</span>
+              <select
+                className="txn-time-select"
+                value={date.slice(14, 16)}
+                onChange={(e) => setDate(date.slice(0, 10) + 'T' + date.slice(11, 13) + ':' + e.target.value)}
+              >
+                {Array.from({ length: 60 }).map((_, i) => {
+                  const m = String(i).padStart(2, '0')
+                  return <option key={m} value={m}>{m}</option>
+                })}
+              </select>
+            </div>
+          </div>
+        </div>
+        <button
+          type="button"
+          className="txn-current-time-btn"
+          onClick={setCurrentTime}
+        >
+          <Clock size={14} />
+          Giờ hiện tại
+        </button>
       </div>
 
       {/* Note */}

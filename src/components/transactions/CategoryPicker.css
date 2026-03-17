@@ -1,0 +1,216 @@
+/* ═══════ Category Picker Modal ═══════ */
+
+.cpicker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-end;
+  animation: fadeIn 0.15s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.cpicker-modal {
+  width: 100%;
+  max-height: 85vh;
+  background: var(--color-surface);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  display: flex;
+  flex-direction: column;
+  animation: slideUp 0.25s ease;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+/* Header */
+.cpicker-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cpicker-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: var(--color-bg);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  transition: all 0.15s;
+}
+
+.cpicker-close:hover {
+  background: var(--color-surface-hover);
+}
+
+.cpicker-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* Search */
+.cpicker-search {
+  position: relative;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cpicker-search-icon {
+  position: absolute;
+  left: 28px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  pointer-events: none;
+}
+
+.cpicker-search-input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  font-size: 0.875rem;
+  background: var(--color-bg);
+  color: var(--color-text);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.cpicker-search-input:focus {
+  border-color: var(--color-primary);
+}
+
+/* List */
+.cpicker-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cpicker-empty {
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--color-text-muted);
+  font-size: 0.875rem;
+}
+
+/* Parent row */
+.cpicker-group {
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.cpicker-group:last-child {
+  border-bottom: none;
+}
+
+.cpicker-parent {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.cpicker-parent:hover,
+.cpicker-parent.expanded {
+  background: var(--color-surface-hover);
+}
+
+.cpicker-chevron {
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cpicker-parent-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.cpicker-parent-name {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  flex: 1;
+}
+
+.cpicker-parent-count {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  background: var(--color-bg);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+/* Sub rows */
+.cpicker-subs {
+  animation: fadeSlideDown 0.2s ease;
+}
+
+@keyframes fadeSlideDown {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.cpicker-sub {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 11px 16px 11px 52px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.12s;
+  text-align: left;
+}
+
+.cpicker-sub:hover {
+  background: var(--color-surface-hover);
+}
+
+.cpicker-sub.active {
+  background: rgb(99 102 241 / 0.06);
+}
+
+.cpicker-sub-icon {
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.cpicker-sub-name {
+  font-size: 0.875rem;
+  color: var(--color-text);
+  flex: 1;
+}
+
+.cpicker-check {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  flex-shrink: 0;
+}

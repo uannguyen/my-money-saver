@@ -10,7 +10,7 @@
 }
 
 .category-modal {
-  background-color: var(--surface);
+  background-color: var(--color-surface);
   border-radius: 1rem;
   width: 100%;
   max-width: 400px;
@@ -23,13 +23,13 @@
   align-items: center;
   justify-content: space-between;
   padding: 1.25rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .category-modal-header h3 {
   margin: 0;
   font-size: 1.125rem;
-  color: var(--text-base);
+  color: var(--color-text);
 }
 
 /* Preview */
@@ -60,7 +60,7 @@
 .close-btn {
   background: none;
   border: none;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 50%;
@@ -71,8 +71,8 @@
 }
 
 .close-btn:hover {
-  background-color: var(--background);
-  color: var(--text-base);
+  background-color: var(--color-surface-hover);
+  color: var(--color-text);
 }
 
 .category-form {
@@ -87,41 +87,54 @@
   display: block;
   font-size: 0.875rem;
   font-weight: 500;
-  color: var(--text-muted);
+  color: var(--color-text-muted);
   margin-bottom: 0.5rem;
 }
 
-.icon-grid {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr);
+.icon-selector-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
   gap: 0.5rem;
-  max-height: 200px;
-  overflow-y: auto;
-  padding-right: 0.5rem;
 }
 
-.icon-btn {
-  background: none;
-  border: 1px solid var(--border);
+.icon-selector-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: 0.5rem;
-  font-size: 1.5rem;
-  padding: 0.5rem;
+  font-size: 2rem;
+  padding: 0.75rem;
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 4rem;
+  height: 4rem;
 }
 
-.icon-btn:hover {
-  background-color: var(--background);
-  transform: scale(1.1);
+.icon-selector-btn:hover {
+  background-color: var(--color-surface-hover);
+  border-color: var(--color-primary);
 }
 
-.icon-btn.selected {
-  border-color: var(--primary);
-  background-color: var(--primary-light);
-  transform: scale(1.1);
+.emoji-picker-container {
+  margin-top: 0.5rem;
+  animation: slideDown 0.2s ease-out;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .category-form-actions {

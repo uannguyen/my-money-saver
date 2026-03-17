@@ -4,7 +4,7 @@ import { useBudget } from '../hooks/useBudget'
 import { Header } from '../components/layout/Header'
 import { BudgetCard } from '../components/budget/BudgetCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
-import { ALL_DEFAULT_CATEGORIES, DEFAULT_EXPENSE_CATEGORIES } from '../constants/categories'
+import { ALL_DEFAULT_CATEGORIES } from '../constants/categories'
 import { getMonthKey } from '../utils/dateHelpers'
 import { parseVND } from '../utils/formatCurrency'
 import toast from 'react-hot-toast'
@@ -67,8 +67,8 @@ export function BudgetPage() {
 
   // Categories not yet budgeted
   const budgetedCategoryIds = budgets.map((b) => b.categoryId)
-  const availableCategories = DEFAULT_EXPENSE_CATEGORIES.filter(
-    (c) => !budgetedCategoryIds.includes(c.id) || editTarget?.categoryId === c.id
+  const availableCategories = ALL_DEFAULT_CATEGORIES.filter(
+    (c) => c.type === 'expense' && (!budgetedCategoryIds.includes(c.id) || editTarget?.categoryId === c.id)
   )
 
   return (

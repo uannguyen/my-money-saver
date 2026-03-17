@@ -1,11 +1,12 @@
 import {
   collection,
-  addDoc,
-  updateDoc,
+  setDoc,
   deleteDoc,
   query,
   getDocs,
   doc,
+  arrayUnion,
+  arrayRemove,
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
@@ -14,57 +15,94 @@ function getCategoriesRef(userId) {
   return collection(db, 'users', userId, 'categories')
 }
 
-function getCategoryDoc(userId, id) {
-  return doc(db, 'users', userId, 'categories', id)
+function getParentDoc(userId, parentId) {
+  return doc(db, 'users', userId, 'categories', parentId)
 }
 
+// ─── Parent Category CRUD ────────────────────────────────────────────────────
+
 /**
- * Add a new custom category for user
+ * Add or update a custom parent category (with optional subs array).
  */
-export async function addCustomCategory(userId, data) {
-  const ref = getCategoriesRef(userId)
-  const docData = {
-    name: data.name,
-    icon: data.icon,
-    type: data.type, // 'expense' or 'income'
+export async function saveCustomParent(userId, parentData) {
+  const id = parentData.id
+  const ref = getParentDoc(userId, id)
+  const data = {
+    id,
+    name: parentData.name,
+    icon: parentData.icon,
+    type: parentData.type,
+    subs: parentData.subs || [],
     createdAt: Timestamp.now(),
   }
-  const docRef = await addDoc(ref, docData)
-  return { id: docRef.id, ...docData }
+  await setDoc(ref, data, { merge: true })
+  return data
 }
 
 /**
- * Update an existing custom category
+ * Update only the name/icon of a parent category.
  */
-export async function updateCustomCategory(userId, id, data) {
-  const ref = getCategoryDoc(userId, id)
-  const updateData = {
-    name: data.name,
-    icon: data.icon,
+export async function updateCustomParent(userId, parentId, fields) {
+  const ref = getParentDoc(userId, parentId)
+  const data = {
+    name: fields.name,
+    icon: fields.icon,
     updatedAt: Timestamp.now(),
   }
-  await updateDoc(ref, updateData)
-  return { id, ...updateData }
+  await setDoc(ref, data, { merge: true })
+  return { id: parentId, ...data }
 }
 
 /**
- * Delete a custom category
+ * Delete a custom parent category (and all its subs).
  */
-export async function deleteCustomCategory(userId, id) {
-  const ref = getCategoryDoc(userId, id)
+export async function deleteCustomParent(userId, parentId) {
+  const ref = getParentDoc(userId, parentId)
   await deleteDoc(ref)
 }
 
+// ─── Sub-Category CRUD ────────────────────────────────────────────────────────
+
 /**
- * Get all custom categories for user
+ * Add a sub-category to the parent's `subs` array.
  */
-export async function getCustomCategories(userId) {
+export async function addSubCategory(userId, parentId, subData) {
+  const ref = getParentDoc(userId, parentId)
+  const sub = {
+    id: subData.id || `${parentId}_${Date.now()}`,
+    name: subData.name,
+    icon: subData.icon,
+  }
+  await setDoc(ref, { subs: arrayUnion(sub) }, { merge: true })
+  return sub
+}
+
+/**
+ * Remove a sub-category from the parent's `subs` array.
+ * Requires the exact sub object to match (Firestore arrayRemove equality).
+ */
+export async function deleteSubCategory(userId, parentId, sub) {
+  const ref = getParentDoc(userId, parentId)
+  await setDoc(ref, { subs: arrayRemove(sub) }, { merge: true })
+}
+
+// ─── Fetch ────────────────────────────────────────────────────────────────────
+
+/**
+ * Get all custom parent categories (each with subs array).
+ */
+export async function getCustomParents(userId) {
   const ref = getCategoriesRef(userId)
-  const q = query(ref)
-  const snapshot = await getDocs(q)
-  return snapshot.docs.map((doc) => ({
-    id: doc.id,
-    ...doc.data(),
-    createdAt: doc.data().createdAt?.toDate(),
+  const snapshot = await getDocs(query(ref))
+  return snapshot.docs.map((d) => ({
+    ...d.data(),
+    id: d.id,
+    subs: d.data().subs || [],
   }))
 }
+
+// Keep old alias for any callers
+export const getCustomCategories = getCustomParents
+export const addCustomCategory = (userId, data) => saveCustomParent(userId, data)
+export const updateCustomCategory = (userId, id, data) => updateCustomParent(userId, id, data)
+export const deleteCustomCategory = deleteCustomParent

@@ -146,15 +146,16 @@ export const ALL_DEFAULT_PARENTS = [
   ...DEFAULT_INCOME_PARENTS,
 ]
 
-/** Flat list of all sub-categories (for transaction lookup by categoryId) */
-export const ALL_DEFAULT_CATEGORIES = ALL_DEFAULT_PARENTS.flatMap((parent) =>
-  parent.subs.map((sub) => ({
+/** Flat list of all categories (subs + parents) for transaction lookup by categoryId */
+export const ALL_DEFAULT_CATEGORIES = ALL_DEFAULT_PARENTS.flatMap((parent) => {
+  const subs = parent.subs.map((sub) => ({
     ...sub,
     type: parent.type,
     parentId: parent.id,
     parentName: parent.name,
   }))
-)
+  return [...subs, { ...parent, parentId: null, parentName: null }]
+})
 
 // IDs that cannot be deleted
 export const DEFAULT_PARENT_IDS = new Set(ALL_DEFAULT_PARENTS.map((p) => p.id))

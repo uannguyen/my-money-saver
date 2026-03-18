@@ -120,22 +120,53 @@
   border-bottom: none;
 }
 
-.cpicker-parent {
+.cpicker-parent-row {
+  display: flex;
+  align-items: stretch;
+  width: 100%;
+  border: none;
+  background: transparent;
+  transition: background 0.12s;
+}
+
+.cpicker-parent-row.active {
+  background: rgb(99 102 241 / 0.06);
+}
+
+.cpicker-parent-row:hover {
+  background: var(--color-surface-hover);
+}
+
+.cpicker-parent-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.cpicker-parent-toggle:hover {
+  background: rgba(0,0,0,0.03);
+}
+
+.cpicker-parent-select {
   display: flex;
   align-items: center;
   gap: 10px;
-  width: 100%;
-  padding: 12px 16px;
+  flex: 1;
+  padding: 12px 16px 12px 4px;
   border: none;
   background: transparent;
   cursor: pointer;
-  transition: background 0.12s;
   text-align: left;
+  transition: background 0.12s;
 }
 
-.cpicker-parent:hover,
-.cpicker-parent.expanded {
-  background: var(--color-surface-hover);
+.cpicker-parent-select:hover {
+  background: rgba(0,0,0,0.03);
 }
 
 .cpicker-chevron {

@@ -109,9 +109,8 @@ export function BudgetPage() {
 
       {/* Add/Edit Budget Form (overlay) */}
       {showForm && (
-        <>
-          <div className="overlay" onClick={() => setShowForm(false)} />
-          <div className="dialog animate-scale-in">
+        <div className="overlay" onClick={() => setShowForm(false)}>
+          <div className="dialog" onClick={(e) => e.stopPropagation()}>
             <h3 className="dialog-title">
               {editTarget ? 'Sửa ngân sách' : 'Thêm ngân sách'}
             </h3>
@@ -157,7 +156,7 @@ export function BudgetPage() {
               </button>
             </div>
           </div>
-        </>
+        </div>
       )}
 
       <ConfirmDialog

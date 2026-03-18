@@ -53,6 +53,10 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
     onSelect({ ...sub, type: parent.type, parentId: parent.id, parentName: parent.name })
   }
 
+  const handleSelectParent = (parent) => {
+    onSelect({ ...parent, type: parent.type, parentId: null, parentName: null })
+  }
+
   return (
     <div className="cpicker-overlay" onClick={(e) => e.target === e.currentTarget && onClose()}>
       <div className="cpicker-modal">
@@ -88,17 +92,25 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
             return (
               <div key={parent.id} className="cpicker-group">
                 {/* Parent row */}
-                <button
-                  className={`cpicker-parent ${isExpanded ? 'expanded' : ''}`}
-                  onClick={() => toggleExpand(parent.id)}
-                >
-                  <span className="cpicker-chevron">
-                    {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
-                  </span>
-                  <span className="cpicker-parent-icon">{parent.icon}</span>
-                  <span className="cpicker-parent-name">{parent.name}</span>
-                  <span className="cpicker-parent-count">{parent.subs.length}</span>
-                </button>
+                <div className={`cpicker-parent-row ${selectedId === parent.id ? 'active' : ''}`}>
+                  <button
+                    className={`cpicker-parent-toggle ${isExpanded ? 'expanded' : ''}`}
+                    onClick={() => toggleExpand(parent.id)}
+                  >
+                    <span className="cpicker-chevron">
+                      {isExpanded ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
+                    </span>
+                  </button>
+                  <button
+                    className="cpicker-parent-select"
+                    onClick={() => handleSelectParent(parent)}
+                  >
+                    <span className="cpicker-parent-icon">{parent.icon}</span>
+                    <span className="cpicker-parent-name">{parent.name}</span>
+                    <span className="cpicker-parent-count">{parent.subs.length}</span>
+                    {selectedId === parent.id && <span className="cpicker-check">✓</span>}
+                  </button>
+                </div>
 
                 {/* Sub rows */}
                 {isExpanded && (

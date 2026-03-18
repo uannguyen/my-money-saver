@@ -1,13 +1,11 @@
-import { useState } from 'react'
 import './ConfirmDialog.css'
 
 export function ConfirmDialog({ open, title, message, onConfirm, onCancel, danger = false }) {
   if (!open) return null
 
   return (
-    <>
-      <div className="overlay" onClick={onCancel} />
-      <div className="dialog animate-scale-in">
+    <div className="overlay" onClick={onCancel}>
+      <div className="dialog" onClick={(e) => e.stopPropagation()}>
         <h3 className="dialog-title">{title || 'Xác nhận'}</h3>
         <p className="dialog-message">{message}</p>
         <div className="dialog-actions">
@@ -22,6 +20,6 @@ export function ConfirmDialog({ open, title, message, onConfirm, onCancel, dange
           </button>
         </div>
       </div>
-    </>
+    </div>
   )
 }

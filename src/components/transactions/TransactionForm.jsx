@@ -3,6 +3,7 @@ import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
 import { CategoryPicker } from './CategoryPicker'
+import { DateTimePickerModal } from './DateTimePickerModal'
 import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
 import './TransactionForm.css'
 
@@ -25,16 +26,21 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const { parents, categories: allCats } = useCategories()
   const [type, setType] = useState(initial?.type || 'expense')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
+  const [showDateTimePicker, setShowDateTimePicker] = useState(false)
   const [amountStr, setAmountStr] = useState(
     initial?.amount ? formatVND(initial.amount).replace('đ', '') : ''
   )
   const [categoryId, setCategoryId] = useState(initial?.categoryId || '')
+  const [categoryError, setCategoryError] = useState('')
   const [date, setDate] = useState(() => getInitialDateTime(initial))
   const [note, setNote] = useState(initial?.note || '')
   const [submitting, setSubmitting] = useState(false)
 
   // Find selected category info for display
-  const selectedCat = allCats.find((c) => c.id === categoryId) || null
+  let selectedCat = allCats.find((c) => c.id === categoryId)
+  if (!selectedCat) {
+    selectedCat = parents.find((c) => c.id === categoryId) || null
+  }
 
   // Reset categoryId when type changes if current selection doesn't match
   useEffect(() => {
@@ -42,6 +48,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
       setCategoryId('')
     }
   }, [type])
+
+  // Clear category error when a category is selected
+  useEffect(() => {
+    if (categoryId) setCategoryError('')
+  }, [categoryId])
 
   const handleAmountChange = (e) => {
     const raw = e.target.value.replace(/[^\d]/g, '')
@@ -60,7 +71,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const handleSubmit = async (e) => {
     e.preventDefault()
     const amount = parseVND(amountStr)
-    if (!amount || !categoryId) return
+    if (!amount) return
+    if (!categoryId) {
+      setCategoryError('Vui lòng chọn danh mục')
+      return
+    }
 
     setSubmitting(true)
     try {
@@ -77,7 +92,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     }
   }
 
-  // Format date for display
+  // Format date for display in trigger button
   const dateObj = new Date(date)
   const displayDate = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`
   const displayTime = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`
@@ -121,7 +136,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <label className="txn-form-label">Danh mục</label>
         <button
           type="button"
-          className={`txn-cat-selector ${selectedCat ? 'has-value' : ''}`}
+          className={`txn-cat-selector ${selectedCat ? 'has-value' : ''} ${categoryError ? 'has-error' : ''}`}
           onClick={() => setShowCategoryPicker(true)}
         >
           {selectedCat ? (
@@ -129,7 +144,9 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
               <span className="txn-cat-icon">{selectedCat.icon}</span>
               <div className="txn-cat-info">
                 <span className="txn-cat-name">{selectedCat.name}</span>
-                <span className="txn-cat-parent">{selectedCat.parentName}</span>
+                {selectedCat.parentName ? (
+                  <span className="txn-cat-parent">{selectedCat.parentName}</span>
+                ) : null}
               </div>
             </>
           ) : (
@@ -137,6 +154,9 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           )}
           <ChevronRight size={18} className="txn-cat-chevron" />
         </button>
+        {categoryError && (
+          <span className="txn-cat-error">{categoryError}</span>
+        )}
       </div>
 
       {showCategoryPicker && (
@@ -151,46 +171,21 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         />
       )}
 
-      {/* Date & Time */}
+      {/* Date & Time — single trigger button */}
       <div className="txn-form-section">
         <label className="txn-form-label">Ngày giờ</label>
-        <div className="txn-datetime-row">
-          <div className="txn-datetime-input-wrapper">
-            <CalendarDays size={16} className="txn-datetime-icon" />
-            <input
-              type="date"
-              className="txn-date-input"
-              value={date.slice(0, 10)}
-              onChange={(e) => setDate(e.target.value + 'T' + date.slice(11, 16))}
-            />
-          </div>
-          <div className="txn-datetime-input-wrapper">
-            <Clock size={16} className="txn-datetime-icon" />
-            <div className="txn-time-input custom-time-picker">
-              <select
-                className="txn-time-select"
-                value={date.slice(11, 13)}
-                onChange={(e) => setDate(date.slice(0, 10) + 'T' + e.target.value + ':' + date.slice(14, 16))}
-              >
-                {Array.from({ length: 24 }).map((_, i) => {
-                  const h = String(i).padStart(2, '0')
-                  return <option key={h} value={h}>{h}</option>
-                })}
-              </select>
-              <span className="txn-time-separator">:</span>
-              <select
-                className="txn-time-select"
-                value={date.slice(14, 16)}
-                onChange={(e) => setDate(date.slice(0, 10) + 'T' + date.slice(11, 13) + ':' + e.target.value)}
-              >
-                {Array.from({ length: 60 }).map((_, i) => {
-                  const m = String(i).padStart(2, '0')
-                  return <option key={m} value={m}>{m}</option>
-                })}
-              </select>
-            </div>
-          </div>
-        </div>
+        <button
+          type="button"
+          className="txn-datetime-trigger"
+          onClick={() => setShowDateTimePicker(true)}
+        >
+          <CalendarDays size={16} className="txn-datetime-trigger-icon" />
+          <span className="txn-datetime-trigger-date">{displayDate}</span>
+          <span className="txn-datetime-trigger-sep" />
+          <Clock size={16} className="txn-datetime-trigger-icon" />
+          <span className="txn-datetime-trigger-time">{displayTime}</span>
+        </button>
+
         <button
           type="button"
           className="txn-current-time-btn"
@@ -199,6 +194,17 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           <Clock size={14} />
           Giờ hiện tại
         </button>
+
+        {showDateTimePicker && (
+          <DateTimePickerModal
+            dateStr={date}
+            onClose={() => setShowDateTimePicker(false)}
+            onConfirm={(newDateStr) => {
+              setDate(newDateStr)
+              setShowDateTimePicker(false)
+            }}
+          />
+        )}
       </div>
 
       {/* Note */}
@@ -223,7 +229,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <button
           type="submit"
           className="btn btn-primary txn-form-submit"
-          disabled={!parseVND(amountStr) || !categoryId || submitting}
+          disabled={!parseVND(amountStr) || submitting}
         >
           {submitting ? 'Đang lưu...' : initial ? 'Cập nhật' : 'Lưu'}
         </button>

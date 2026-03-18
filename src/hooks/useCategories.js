@@ -20,10 +20,11 @@ export function useCategories() {
   const [parents, setParents] = useState(ALL_DEFAULT_PARENTS)
   const [loading, setLoading] = useState(true)
 
-  // Flat list of all sub-categories for transaction forms
-  const categories = parents.flatMap((p) =>
-    p.subs.map((s) => ({ ...s, type: p.type, parentId: p.id, parentName: p.name }))
-  )
+  // Flat list of all categories (subs + parents) for transaction lookup
+  const categories = parents.flatMap((p) => {
+    const subs = p.subs.map((s) => ({ ...s, type: p.type, parentId: p.id, parentName: p.name }))
+    return [...subs, { ...p, parentId: null, parentName: null }]
+  })
 
   const fetchCategories = useCallback(async () => {
     if (!user?.uid) return

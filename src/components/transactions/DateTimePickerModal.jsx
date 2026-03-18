@@ -71,10 +71,15 @@ function TimeWheel({ items, value, onChange }) {
 }
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
-export function DateTimePickerModal({ dateStr, onClose, onConfirm }) {
+export function DateTimePickerModal({ dateStr, initialTab = 'calendar', onClose, onConfirm }) {
   const parsed = dateStr ? new Date(dateStr) : new Date()
 
-  const [activeTab, setActiveTab] = useState('calendar')
+  const [activeTab, setActiveTab] = useState(initialTab)
+
+  // Sync tab when initialTab changes (e.g. if component stays mounted)
+  useEffect(() => {
+    setActiveTab(initialTab)
+  }, [initialTab])
   const [viewYear, setViewYear] = useState(parsed.getFullYear())
   const [viewMonth, setViewMonth] = useState(parsed.getMonth())
   const [selYear, setSelYear] = useState(parsed.getFullYear())

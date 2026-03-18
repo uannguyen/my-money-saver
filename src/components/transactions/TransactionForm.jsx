@@ -27,6 +27,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [type, setType] = useState(initial?.type || 'expense')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
   const [showDateTimePicker, setShowDateTimePicker] = useState(false)
+  const [pickerTab, setPickerTab] = useState('calendar')
   const [amountStr, setAmountStr] = useState(
     initial?.amount ? formatVND(initial.amount).replace('đ', '') : ''
   )
@@ -171,20 +172,30 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         />
       )}
 
-      {/* Date & Time — single trigger button */}
+      {/* Date & Time — dual trigger buttons */}
       <div className="txn-form-section">
         <label className="txn-form-label">Ngày giờ</label>
-        <button
-          type="button"
-          className="txn-datetime-trigger"
-          onClick={() => setShowDateTimePicker(true)}
-        >
-          <CalendarDays size={16} className="txn-datetime-trigger-icon" />
-          <span className="txn-datetime-trigger-date">{displayDate}</span>
-          <span className="txn-datetime-trigger-sep" />
-          <Clock size={16} className="txn-datetime-trigger-icon" />
-          <span className="txn-datetime-trigger-time">{displayTime}</span>
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            type="button"
+            className="txn-datetime-trigger"
+            onClick={() => { setPickerTab('calendar'); setShowDateTimePicker(true); }}
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            <CalendarDays size={16} className="txn-datetime-trigger-icon" />
+            <span className="txn-datetime-trigger-date">{displayDate}</span>
+          </button>
+          
+          <button
+            type="button"
+            className="txn-datetime-trigger"
+            onClick={() => { setPickerTab('time'); setShowDateTimePicker(true); }}
+            style={{ flex: 1, justifyContent: 'center' }}
+          >
+            <Clock size={16} className="txn-datetime-trigger-icon" />
+            <span className="txn-datetime-trigger-time">{displayTime}</span>
+          </button>
+        </div>
 
         <button
           type="button"
@@ -198,6 +209,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         {showDateTimePicker && (
           <DateTimePickerModal
             dateStr={date}
+            initialTab={pickerTab}
             onClose={() => setShowDateTimePicker(false)}
             onConfirm={(newDateStr) => {
               setDate(newDateStr)

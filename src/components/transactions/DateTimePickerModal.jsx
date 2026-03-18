@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import { TimeInput } from './TimeInput'
 import './DateTimePickerModal.css'
 
 // ─── helpers ────────────────────────────────────────────────────────────────
@@ -21,13 +22,11 @@ function TimeWheel({ items, value, onChange }) {
   const containerRef = useRef(null)
   const ITEM_HEIGHT = 44
 
-  // Scroll to selected item on mount / value change
   useEffect(() => {
     const container = containerRef.current
     if (!container) return
     const idx = items.indexOf(value)
     if (idx < 0) return
-    // Spacers at top/bottom = 2 items height each, so item center = idx * ITEM_HEIGHT + ITEM_HEIGHT/2
     container.scrollTop = idx * ITEM_HEIGHT
   }, [value]) // eslint-disable-line
 
@@ -39,7 +38,6 @@ function TimeWheel({ items, value, onChange }) {
       const idx = Math.round(container.scrollTop / ITEM_HEIGHT)
       const clamped = Math.max(0, Math.min(idx, items.length - 1))
       if (items[clamped] !== value) onChange(items[clamped])
-      // Snap
       container.scrollTop = clamped * ITEM_HEIGHT
     }, 80)
   }
@@ -74,103 +72,27 @@ function TimeWheel({ items, value, onChange }) {
 
 // ─── Main Modal ───────────────────────────────────────────────────────────────
 export function DateTimePickerModal({ dateStr, onClose, onConfirm }) {
-  // dateStr is "YYYY-MM-DDTHH:mm"
   const parsed = dateStr ? new Date(dateStr) : new Date()
 
-  const [activeTab, setActiveTab] = useState('calendar') // 'calendar' | 'time'
-  // Calendar state
+  const [activeTab, setActiveTab] = useState('calendar')
   const [viewYear, setViewYear] = useState(parsed.getFullYear())
   const [viewMonth, setViewMonth] = useState(parsed.getMonth())
   const [selYear, setSelYear] = useState(parsed.getFullYear())
   const [selMonth, setSelMonth] = useState(parsed.getMonth())
   const [selDay, setSelDay] = useState(parsed.getDate())
-  // Time state
-  const [selHour, setSelHour] = useState(String(parsed.getHours()).padStart(2, '0'))
-  const [selMinute, setSelMinute] = useState(String(parsed.getMinutes()).padStart(2, '0'))
 
-  // Direct numeric input state
-  const [inpSelHour, setInpSelHour] = useState(selHour)
-  const [inpSelMinute, setInpSelMinute] = useState(selMinute)
-  const [hourError, setHourError] = useState(false)
-  const [minError, setMinError] = useState(false)
-  const minInputRef = useRef(null)
+  // Time state — stored as NUMBER, not string
+  const [hour, setHour] = useState(parsed.getHours())
+  const [minute, setMinute] = useState(parsed.getMinutes())
 
-  useEffect(() => {
-    setInpSelHour(selHour)
-    setHourError(false)
-  }, [selHour])
-
-  useEffect(() => {
-    setInpSelMinute(selMinute)
-    setMinError(false)
-  }, [selMinute])
-
-  const handleHourChange = (e) => {
-    const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 2)
-    setInpSelHour(val)
-    if (val.length === 2) {
-      const num = parseInt(val, 10)
-      if (num >= 0 && num <= 23) {
-        setSelHour(val)
-        setHourError(false)
-        minInputRef.current?.focus()
-      } else {
-        setHourError(true)
-      }
-    } else {
-      setHourError(val !== '' && parseInt(val, 10) > 23)
-    }
-  }
-
-  const handleHourBlur = () => {
-    if (inpSelHour === '') {
-      setInpSelHour(selHour)
-      setHourError(false)
-      return
-    }
-    let num = parseInt(inpSelHour, 10)
-    if (isNaN(num)) num = 0
-    if (num > 23) num = 23
-    const format = String(num).padStart(2, '0')
-    setInpSelHour(format)
-    setSelHour(format)
-    setHourError(false)
-  }
-
-  const handleMinChange = (e) => {
-    const val = e.target.value.replace(/[^0-9]/g, '').slice(0, 2)
-    setInpSelMinute(val)
-    if (val.length === 2) {
-      const num = parseInt(val, 10)
-      if (num >= 0 && num <= 59) {
-        setSelMinute(val)
-        setMinError(false)
-        e.target.blur()
-      } else {
-        setMinError(true)
-      }
-    } else {
-      setMinError(val !== '' && parseInt(val, 10) > 59)
-    }
-  }
-
-  const handleMinBlur = () => {
-    if (inpSelMinute === '') {
-      setInpSelMinute(selMinute)
-      setMinError(false)
-      return
-    }
-    let num = parseInt(inpSelMinute, 10)
-    if (isNaN(num)) num = 0
-    if (num > 59) num = 59
-    const format = String(num).padStart(2, '0')
-    setInpSelMinute(format)
-    setSelMinute(format)
-    setMinError(false)
-  }
+  const minuteInputRef = useRef(null)
 
   const hours = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'))
   const minutes = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'))
+
+  // Derived strings for drum wheel + display
+  const hourStr = String(hour).padStart(2, '0')
+  const minuteStr = String(minute).padStart(2, '0')
 
   // Calendar grid
   const firstDow = getFirstDayOfWeek(viewYear, viewMonth)
@@ -202,20 +124,19 @@ export function DateTimePickerModal({ dateStr, onClose, onConfirm }) {
 
   const setCurrentTime = () => {
     const now = new Date()
-    setSelHour(String(now.getHours()).padStart(2, '0'))
-    setSelMinute(String(now.getMinutes()).padStart(2, '0'))
+    setHour(now.getHours())
+    setMinute(now.getMinutes())
   }
 
   const handleConfirm = () => {
     const mm = String(selMonth + 1).padStart(2, '0')
     const dd = String(selDay).padStart(2, '0')
-    const newDateStr = `${selYear}-${mm}-${dd}T${selHour}:${selMinute}`
+    const newDateStr = `${selYear}-${mm}-${dd}T${hourStr}:${minuteStr}`
     onConfirm(newDateStr)
   }
 
-  // Tab header display
   const tabDateLabel = `${String(selMonth + 1).padStart(2, '0')}/${String(selDay).padStart(2, '0')}/${selYear}`
-  const tabTimeLabel = `${selHour}:${selMinute}`
+  const tabTimeLabel = `${hourStr}:${minuteStr}`
 
   return (
     <div className="dtpm-overlay" onClick={onClose}>
@@ -285,33 +206,32 @@ export function DateTimePickerModal({ dateStr, onClose, onConfirm }) {
           <div className="dtpm-time">
             <div className="dtpm-wheels-wrapper">
               <div className="dtpm-wheel-highlight" />
-              <TimeWheel items={hours} value={selHour} onChange={setSelHour} />
+              <TimeWheel
+                items={hours}
+                value={hourStr}
+                onChange={(v) => setHour(parseInt(v, 10))}
+              />
               <div className="dtpm-colon">:</div>
-              <TimeWheel items={minutes} value={selMinute} onChange={setSelMinute} />
+              <TimeWheel
+                items={minutes}
+                value={minuteStr}
+                onChange={(v) => setMinute(parseInt(v, 10))}
+              />
             </div>
 
             <div className="dtpm-direct-inputs">
-              <input
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                className={`dtpm-time-input ${hourError ? 'error' : ''}`}
-                value={inpSelHour}
-                onChange={handleHourChange}
-                onBlur={handleHourBlur}
-                onFocus={(e) => e.target.select()}
+              <TimeInput
+                value={hour}
+                max={23}
+                onChange={setHour}
+                autoFocusNext={minuteInputRef}
               />
               <span className="dtpm-time-input-colon">:</span>
-              <input
-                ref={minInputRef}
-                type="text"
-                inputMode="numeric"
-                pattern="[0-9]*"
-                className={`dtpm-time-input ${minError ? 'error' : ''}`}
-                value={inpSelMinute}
-                onChange={handleMinChange}
-                onBlur={handleMinBlur}
-                onFocus={(e) => e.target.select()}
+              <TimeInput
+                ref={minuteInputRef}
+                value={minute}
+                max={59}
+                onChange={setMinute}
               />
             </div>
 
@@ -319,11 +239,10 @@ export function DateTimePickerModal({ dateStr, onClose, onConfirm }) {
               <button type="button" className="dtpm-btn-text" onClick={setCurrentTime}>Current time</button>
               <div className="dtpm-footer-right">
                 <button type="button" className="dtpm-btn-close" onClick={onClose}>Close</button>
-                <button 
-                  type="button" 
-                  className="dtpm-btn-confirm" 
+                <button
+                  type="button"
+                  className="dtpm-btn-confirm"
                   onClick={handleConfirm}
-                  disabled={hourError || minError}
                 >
                   Confirm
                 </button>

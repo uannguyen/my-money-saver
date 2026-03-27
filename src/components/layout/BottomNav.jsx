@@ -8,7 +8,7 @@ const tabs = [
   { path: '/settings', icon: '⚙️', label: 'Cài đặt' },
 ]
 
-export function BottomNav() {
+export function BottomNav({ budgetAlertCount = 0 }) {
   return (
     <nav className="bottom-nav" id="bottom-nav">
       {tabs.map((tab) => (
@@ -20,7 +20,12 @@ export function BottomNav() {
             `bottom-nav-item ${isActive ? 'active' : ''}`
           }
         >
-          <span className="bottom-nav-icon">{tab.icon}</span>
+          <span className="bottom-nav-icon">
+            {tab.icon}
+            {tab.path === '/budget' && budgetAlertCount > 0 && (
+              <span className="bottom-nav-badge">{budgetAlertCount}</span>
+            )}
+          </span>
           <span className="bottom-nav-label">{tab.label}</span>
         </NavLink>
       ))}

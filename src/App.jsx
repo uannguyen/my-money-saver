@@ -8,6 +8,11 @@ import { StatsPage } from './pages/StatsPage'
 import { BudgetPage } from './pages/BudgetPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { Toaster } from 'react-hot-toast'
+import { useTransactions } from './hooks/useTransactions'
+import { useBudget } from './hooks/useBudget'
+import { useBudgetAlerts } from './hooks/useBudgetAlerts'
+import { getMonthKey } from './utils/dateHelpers'
+import { ALL_DEFAULT_CATEGORIES } from './constants/categories'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -28,10 +33,15 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout({ children }) {
+  const currentMonthKey = getMonthKey(new Date())
+  const { expenseByCategory } = useTransactions(currentMonthKey)
+  const { budgets } = useBudget(currentMonthKey, expenseByCategory)
+  const { alertCount } = useBudgetAlerts(budgets, ALL_DEFAULT_CATEGORIES)
+
   return (
     <>
       {children}
-      <BottomNav />
+      <BottomNav budgetAlertCount={alertCount} />
     </>
   )
 }

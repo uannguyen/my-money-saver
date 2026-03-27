@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react'
 import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
+import { useRecentTransactions } from '../../hooks/useRecentTransactions'
+import { useCategorySuggestion } from '../../hooks/useCategorySuggestion'
+import { useDebounce } from '../../hooks/useDebounce'
 import { CategoryPicker } from './CategoryPicker'
+import { CategorySuggestionChips } from './CategorySuggestionChips'
 import { SplitEditor } from './SplitEditor'
 import { DateTimePickerModal } from './DateTimePickerModal'
 import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
@@ -41,6 +45,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [frequency, setFrequency] = useState('monthly')
   const [isSplit, setIsSplit] = useState(initial?.splits?.length > 0 || false)
   const [splits, setSplits] = useState(initial?.splits || [])
+
+  // Category suggestion
+  const { transactions: recentTransactions } = useRecentTransactions(30)
+  const debouncedAmount = useDebounce(parseVND(amountStr), 400)
+  const suggestions = useCategorySuggestion(recentTransactions, debouncedAmount, type)
 
   // Find selected category info for display
   let selectedCat = allCats.find((c) => c.id === categoryId)
@@ -158,6 +167,19 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         />
         <span className="txn-form-currency">đ</span>
       </div>
+
+      {/* Smart category suggestions */}
+      {!isSplit && (
+        <CategorySuggestionChips
+          suggestions={suggestions}
+          selectedCategoryId={categoryId}
+          onSelect={(id) => {
+            setCategoryId(id)
+            setCategoryError('')
+          }}
+          categories={allCats}
+        />
+      )}
 
       {/* Split Toggle */}
       {parseVND(amountStr) > 0 && (

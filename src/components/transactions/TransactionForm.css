@@ -173,3 +173,79 @@
 .txn-current-time-btn:hover {
   background: rgb(99 102 241 / 0.06);
 }
+
+/* ═══════ Recurring Toggle ═══════ */
+.txn-recurring-toggle {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.txn-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.txn-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.txn-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background 0.2s ease;
+}
+
+.txn-toggle-slider::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.15);
+}
+
+.txn-toggle-switch input:checked + .txn-toggle-slider {
+  background: var(--color-primary);
+}
+
+.txn-toggle-switch input:checked + .txn-toggle-slider::before {
+  transform: translateX(20px);
+}
+
+.txn-recurring-freq {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.txn-freq-btn {
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+}
+
+.txn-freq-btn.active {
+  border-color: var(--color-primary);
+  background: rgb(99 102 241 / 0.05);
+  color: var(--color-primary);
+  font-weight: 600;
+}

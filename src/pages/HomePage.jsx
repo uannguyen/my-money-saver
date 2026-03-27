@@ -3,14 +3,15 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useBudget } from '../hooks/useBudget'
 import { useBudgetAlerts } from '../hooks/useBudgetAlerts'
 import { useInsights } from '../hooks/useInsights'
+import { useRecurring } from '../hooks/useRecurring'
 import { Header } from '../components/layout/Header'
 import { TransactionList } from '../components/transactions/TransactionList'
 import { QuickAddSheet } from '../components/transactions/QuickAddSheet'
 import { InsightCard } from '../components/common/InsightCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { formatVND } from '../utils/formatCurrency'
-import { getMonthKey, prevMonth } from '../utils/dateHelpers'
-import { ALL_DEFAULT_CATEGORIES } from '../constants/categories'
+import { getMonthKey, prevMonth, formatDate } from '../utils/dateHelpers'
+import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
 import { addTransaction } from '../services/transactionService'
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
@@ -29,6 +30,7 @@ export function HomePage() {
   const { budgets } = useBudget(monthKey, expenseByCategory)
   const { showDailyToast } = useBudgetAlerts(budgets, ALL_DEFAULT_CATEGORIES)
   const { insights } = useInsights(transactions, prevTransactions, budgets, ALL_DEFAULT_CATEGORIES)
+  const { upcoming3Days } = useRecurring()
   const navigate = useNavigate()
   const [deleteTarget, setDeleteTarget] = useState(null)
   const [showQuickAdd, setShowQuickAdd] = useState(false)
@@ -102,6 +104,27 @@ export function HomePage() {
 
       {/* Insights */}
       <InsightCard insights={insights} />
+
+      {/* Upcoming Recurring Transactions */}
+      {upcoming3Days.length > 0 && (
+        <div className="card upcoming-banner animate-fade-in-up" style={{ marginBottom: 16, padding: '12px 16px' }}>
+          <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: 8 }}>🔔 Sắp tới</div>
+          {upcoming3Days.map((r) => {
+            const cat = getCategoryById(ALL_DEFAULT_CATEGORIES, r.categoryId)
+            return (
+              <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: '0.8125rem' }}>
+                <span>{cat.icon} {cat.name}</span>
+                <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+                  <span style={{ color: 'var(--color-text-muted)' }}>{formatDate(r.nextDueDate)}</span>
+                  <span style={{ fontWeight: 600, color: r.type === 'expense' ? 'var(--color-expense)' : 'var(--color-income)' }}>
+                    {r.type === 'expense' ? '-' : '+'}{formatVND(r.amount)}
+                  </span>
+                </span>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Transaction List */}
       {loading ? (

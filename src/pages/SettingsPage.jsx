@@ -2,6 +2,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { useTransactions } from '../hooks/useTransactions'
 import { Header } from '../components/layout/Header'
 import { CategoryManager } from '../components/categories/CategoryManager'
+import { RecurringManager } from '../components/transactions/RecurringManager'
 import { logOut } from '../services/authService'
 import { exportToExcel } from '../utils/exportExcel'
 import { ALL_DEFAULT_CATEGORIES } from '../constants/categories'
@@ -67,6 +68,12 @@ export function SettingsPage() {
         <div className="card settings-section animate-fade-in-up">
           <h3 className="settings-section-title">Quản lý danh mục</h3>
           <CategoryManager />
+        </div>
+
+        {/* Recurring Transactions */}
+        <div className="card settings-section animate-fade-in-up">
+          <h3 className="settings-section-title">Giao dịch định kỳ</h3>
+          <RecurringManager />
         </div>
 
         {/* Export */}

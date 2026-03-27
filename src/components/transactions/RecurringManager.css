@@ -1,0 +1,145 @@
+.recurring-manager {
+  margin-top: 8px;
+}
+
+.recurring-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.recurring-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.recurring-card-left {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.recurring-card-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.recurring-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recurring-card-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+}
+
+.recurring-card-freq {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.recurring-card-next {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.recurring-card-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.recurring-card-amount {
+  font-weight: 700;
+  font-size: 0.9375rem;
+}
+
+.recurring-card-amount.expense {
+  color: var(--color-expense);
+}
+
+.recurring-card-amount.income {
+  color: var(--color-income);
+}
+
+.recurring-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Toggle Switch */
+.recurring-toggle {
+  position: relative;
+  display: inline-block;
+  width: 36px;
+  height: 20px;
+  cursor: pointer;
+}
+
+.recurring-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.recurring-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--color-border);
+  border-radius: var(--radius-full);
+  transition: background 0.2s ease;
+}
+
+.recurring-toggle-slider::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  transition: transform 0.2s ease;
+}
+
+.recurring-toggle input:checked + .recurring-toggle-slider {
+  background: var(--color-primary);
+}
+
+.recurring-toggle input:checked + .recurring-toggle-slider::before {
+  transform: translateX(16px);
+}
+
+/* Frequency Options */
+.recurring-freq-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.recurring-freq-btn {
+  padding: 8px 12px;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--color-border);
+  background: transparent;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary);
+}
+
+.recurring-freq-btn.active {
+  border-color: var(--color-primary);
+  background: rgb(99 102 241 / 0.05);
+  color: var(--color-primary);
+  font-weight: 600;
+}

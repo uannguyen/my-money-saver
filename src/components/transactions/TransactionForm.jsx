@@ -36,6 +36,8 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [date, setDate] = useState(() => getInitialDateTime(initial))
   const [note, setNote] = useState(initial?.note || '')
   const [submitting, setSubmitting] = useState(false)
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [frequency, setFrequency] = useState('monthly')
 
   // Find selected category info for display
   let selectedCat = allCats.find((c) => c.id === categoryId)
@@ -87,6 +89,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         categoryId,
         date,
         note: note.trim(),
+        ...(isRecurring && !initial ? { isRecurring: true, frequency } : {}),
       })
     } finally {
       setSubmitting(false)
@@ -230,6 +233,38 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           rows={2}
         />
       </div>
+
+      {/* Recurring Toggle (only for new transactions) */}
+      {!initial && (
+        <div className="txn-form-section">
+          <div className="txn-recurring-toggle">
+            <span className="txn-form-label" style={{ margin: 0 }}>🔄 Lặp lại</span>
+            <label className="txn-toggle-switch">
+              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
+              <span className="txn-toggle-slider" />
+            </label>
+          </div>
+          {isRecurring && (
+            <div className="txn-recurring-freq">
+              {[
+                ['daily', 'Hàng ngày'],
+                ['weekly', 'Hàng tuần'],
+                ['monthly', 'Hàng tháng'],
+                ['yearly', 'Hàng năm'],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`txn-freq-btn ${frequency === key ? 'active' : ''}`}
+                  onClick={() => setFrequency(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="txn-form-actions">

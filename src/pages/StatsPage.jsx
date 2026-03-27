@@ -1,10 +1,15 @@
 import { useState } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
+import { useBudget } from '../hooks/useBudget'
 import { Header } from '../components/layout/Header'
 import { MonthlyBarChart } from '../components/charts/MonthlyBarChart'
 import { CategoryPieChart } from '../components/charts/CategoryPieChart'
+import { MonthComparisonCard } from '../components/charts/MonthComparisonCard'
+import { TopTransactions } from '../components/charts/TopTransactions'
+import { WeekdayChart } from '../components/charts/WeekdayChart'
+import { MonthlySummaryCard } from '../components/charts/MonthlySummaryCard'
 import { formatVND } from '../utils/formatCurrency'
-import { getMonthKey } from '../utils/dateHelpers'
+import { getMonthKey, prevMonth } from '../utils/dateHelpers'
 import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
 import './StatsPage.css'
 
@@ -12,6 +17,8 @@ export function StatsPage() {
   const [monthKey, setMonthKey] = useState(getMonthKey(new Date()))
   const { transactions, loading, expenseByCategory, totalIncome, totalExpense } =
     useTransactions(monthKey)
+  const { transactions: prevTransactions } = useTransactions(prevMonth(monthKey))
+  const { budgets } = useBudget(monthKey, expenseByCategory)
 
   // Top expense categories
   const topCategories = Object.entries(expenseByCategory)
@@ -72,6 +79,26 @@ export function StatsPage() {
               </div>
             </div>
           )}
+
+          {/* Month Comparison */}
+          <MonthComparisonCard
+            currentTransactions={transactions}
+            prevTransactions={prevTransactions}
+            categories={ALL_DEFAULT_CATEGORIES}
+          />
+
+          {/* Top 5 Transactions */}
+          <TopTransactions transactions={transactions} categories={ALL_DEFAULT_CATEGORIES} />
+
+          {/* Weekday Chart */}
+          <WeekdayChart transactions={transactions} />
+
+          {/* Monthly Summary */}
+          <MonthlySummaryCard
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            budgets={budgets}
+          />
         </div>
       )}
     </div>

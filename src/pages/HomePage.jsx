@@ -69,16 +69,18 @@ export function HomePage() {
     fabTimerRef.current = setTimeout(() => {
       fabTimerRef.current = null
       navigator.vibrate?.(50)
-      navigate('/add')
+      setShowQuickAdd(true)
     }, 500)
   }
 
   const handleFabTouchEnd = (e) => {
     if (fabTimerRef.current) {
+      // Short tap — let onClick handle navigate('/add')
       clearTimeout(fabTimerRef.current)
       fabTimerRef.current = null
+    } else {
+      // Long press already handled, prevent click
       e.preventDefault()
-      setShowQuickAdd(true)
     }
   }
 
@@ -140,14 +142,14 @@ export function HomePage() {
         />
       )}
 
-      {/* FAB — tap: quick add, long press: full form */}
+      {/* FAB — click/tap: /add, long press (touch): quick add */}
       <button
         className="fab"
         id="fab-add"
         aria-label="Thêm giao dịch"
         onTouchStart={handleFabTouchStart}
         onTouchEnd={handleFabTouchEnd}
-        onClick={() => setShowQuickAdd(true)}
+        onClick={() => navigate('/add')}
       >
         +
       </button>

@@ -2,7 +2,12 @@ import { useState, useEffect } from 'react'
 import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
+import { useRecentTransactions } from '../../hooks/useRecentTransactions'
+import { useCategorySuggestion } from '../../hooks/useCategorySuggestion'
+import { useDebounce } from '../../hooks/useDebounce'
 import { CategoryPicker } from './CategoryPicker'
+import { CategorySuggestionChips } from './CategorySuggestionChips'
+import { SplitEditor } from './SplitEditor'
 import { DateTimePickerModal } from './DateTimePickerModal'
 import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
 import './TransactionForm.css'
@@ -36,6 +41,15 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [date, setDate] = useState(() => getInitialDateTime(initial))
   const [note, setNote] = useState(initial?.note || '')
   const [submitting, setSubmitting] = useState(false)
+  const [isRecurring, setIsRecurring] = useState(false)
+  const [frequency, setFrequency] = useState('monthly')
+  const [isSplit, setIsSplit] = useState(initial?.splits?.length > 0 || false)
+  const [splits, setSplits] = useState(initial?.splits || [])
+
+  // Category suggestion
+  const { transactions: recentTransactions } = useRecentTransactions(30)
+  const debouncedAmount = useDebounce(parseVND(amountStr), 400)
+  const suggestions = useCategorySuggestion(recentTransactions, debouncedAmount, type)
 
   // Find selected category info for display
   let selectedCat = allCats.find((c) => c.id === categoryId)
@@ -73,9 +87,29 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     e.preventDefault()
     const amount = parseVND(amountStr)
     if (!amount) return
-    if (!categoryId) {
-      setCategoryError('Vui lòng chọn danh mục')
-      return
+
+    if (isSplit) {
+      // Validate splits
+      const allHaveCategory = splits.every(s => s.categoryId)
+      const allHaveAmount = splits.every(s => Number(s.amount) > 0)
+      const splitsSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
+      if (!allHaveCategory) {
+        setCategoryError('Vui lòng chọn danh mục cho tất cả phần chia')
+        return
+      }
+      if (!allHaveAmount) {
+        setCategoryError('Mỗi phần chia phải có số tiền > 0')
+        return
+      }
+      if (splitsSum !== amount) {
+        setCategoryError('Tổng các phần chia phải bằng số tiền giao dịch')
+        return
+      }
+    } else {
+      if (!categoryId) {
+        setCategoryError('Vui lòng chọn danh mục')
+        return
+      }
     }
 
     setSubmitting(true)
@@ -84,9 +118,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
       await onSubmit({
         type,
         amount,
-        categoryId,
+        categoryId: isSplit ? (splits[0]?.categoryId || '') : categoryId,
         date,
         note: note.trim(),
+        ...(isSplit ? { isSplit: true, splits } : {}),
+        ...(isRecurring && !initial ? { isRecurring: true, frequency } : {}),
       })
     } finally {
       setSubmitting(false)
@@ -132,6 +168,34 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <span className="txn-form-currency">đ</span>
       </div>
 
+      {/* Smart category suggestions */}
+      {!isSplit && (
+        <CategorySuggestionChips
+          suggestions={suggestions}
+          selectedCategoryId={categoryId}
+          onSelect={(id) => {
+            setCategoryId(id)
+            setCategoryError('')
+          }}
+          categories={allCats}
+        />
+      )}
+
+      {/* Split Toggle */}
+      {parseVND(amountStr) > 0 && (
+        <button type="button" className="txn-split-toggle" onClick={() => { setIsSplit(!isSplit); if (!isSplit) setSplits([{ categoryId: '', amount: 0, note: '' }]) }}>
+          {isSplit ? '✕ Hủy chia' : '✂️ Chia giao dịch'}
+        </button>
+      )}
+
+      {/* Split Editor (replaces category selector when active) */}
+      {isSplit ? (
+        <div className="txn-form-section">
+          <label className="txn-form-label">Chia giao dịch</label>
+          <SplitEditor totalAmount={parseVND(amountStr)} splits={splits} onChange={setSplits} type={type} />
+        </div>
+      ) : (
+      <>
       {/* Category Selector (tap to open picker) */}
       <div className="txn-form-section">
         <label className="txn-form-label">Danh mục</label>
@@ -170,6 +234,8 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           }}
           onClose={() => setShowCategoryPicker(false)}
         />
+      )}
+      </>
       )}
 
       {/* Date & Time — dual trigger buttons */}
@@ -230,6 +296,38 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           rows={2}
         />
       </div>
+
+      {/* Recurring Toggle (only for new transactions) */}
+      {!initial && (
+        <div className="txn-form-section">
+          <div className="txn-recurring-toggle">
+            <span className="txn-form-label" style={{ margin: 0 }}>🔄 Lặp lại</span>
+            <label className="txn-toggle-switch">
+              <input type="checkbox" checked={isRecurring} onChange={(e) => setIsRecurring(e.target.checked)} />
+              <span className="txn-toggle-slider" />
+            </label>
+          </div>
+          {isRecurring && (
+            <div className="txn-recurring-freq">
+              {[
+                ['daily', 'Hàng ngày'],
+                ['weekly', 'Hàng tuần'],
+                ['monthly', 'Hàng tháng'],
+                ['yearly', 'Hàng năm'],
+              ].map(([key, label]) => (
+                <button
+                  key={key}
+                  type="button"
+                  className={`txn-freq-btn ${frequency === key ? 'active' : ''}`}
+                  onClick={() => setFrequency(key)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Actions */}
       <div className="txn-form-actions">

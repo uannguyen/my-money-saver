@@ -28,6 +28,14 @@ export async function addTransaction(userId, data) {
     note: data.note || '',
     date: Timestamp.fromDate(new Date(data.date)),
     createdAt: Timestamp.now(),
+    ...(data.isSplit && {
+      isSplit: true,
+      splits: data.splits.map(s => ({
+        categoryId: s.categoryId,
+        amount: Number(s.amount),
+        note: s.note || '',
+      })),
+    }),
   }
   const docRef = await addDoc(ref, docData)
   return { id: docRef.id, ...docData }
@@ -44,6 +52,14 @@ export async function updateTransaction(userId, transactionId, data) {
     categoryId: data.categoryId,
     note: data.note || '',
     date: Timestamp.fromDate(new Date(data.date)),
+    ...(data.isSplit && {
+      isSplit: true,
+      splits: data.splits.map(s => ({
+        categoryId: s.categoryId,
+        amount: Number(s.amount),
+        note: s.note || '',
+      })),
+    }),
   }
   await updateDoc(ref, updates)
   return { id: transactionId, ...updates }

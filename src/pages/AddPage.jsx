@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { TransactionForm } from '../components/transactions/TransactionForm'
 import { useCategories } from '../hooks/useCategories'
 import { addTransaction, updateTransaction } from '../services/transactionService'
+import { addRecurring, computeNextDueDate } from '../services/recurringService'
 import toast from 'react-hot-toast'
 import './AddPage.css'
 
@@ -20,7 +21,24 @@ export function AddPage() {
         toast.success('Đã cập nhật giao dịch')
       } else {
         await addTransaction(user.uid, data)
-        toast.success('Đã thêm giao dịch')
+
+        // Create recurring rule if enabled
+        if (data.isRecurring && data.frequency) {
+          const startDate = new Date(data.date)
+          await addRecurring(user.uid, {
+            type: data.type,
+            amount: data.amount,
+            categoryId: data.categoryId,
+            note: data.note,
+            frequency: data.frequency,
+            startDate,
+            nextDueDate: computeNextDueDate(startDate, data.frequency),
+            isActive: true,
+          })
+          toast.success('Đã thêm giao dịch + lặp lại')
+        } else {
+          toast.success('Đã thêm giao dịch')
+        }
       }
       navigate('/', { replace: true })
     } catch (err) {

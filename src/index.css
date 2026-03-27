@@ -19,6 +19,9 @@
   --color-text-muted: #94a3b8;
   --color-border: #e2e8f0;
   --color-border-light: #f1f5f9;
+  --color-warning: #eab308;
+  --color-warning-bg: #fefce8;
+  --color-danger-dark: #b91c1c;
 
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
@@ -313,6 +316,10 @@ body {
   background: linear-gradient(90deg, #ef4444, #f87171);
 }
 
+.progress-bar .fill.dark-red {
+  background: linear-gradient(90deg, #b91c1c, #dc2626);
+}
+
 /* ===== Animations ===== */
 @keyframes fadeInUp {
   from {
@@ -356,6 +363,16 @@ body {
 
 .animate-scale-in {
   animation: scaleIn 0.2s ease-out;
+}
+
+/* ===== Slide Up (Bottom sheets) ===== */
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slideUp 200ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ===== Empty State ===== */

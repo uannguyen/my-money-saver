@@ -1,0 +1,61 @@
+.goals-summary {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.goals-summary-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+
+.goals-summary-label {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.goals-summary-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goals-fab {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 80px);
+  right: 20px;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  border: none;
+  background: var(--color-primary);
+  color: white;
+  font-size: 1.75rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 0 4px 16px rgb(59 130 246 / 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.15s, box-shadow 0.15s;
+  z-index: 50;
+}
+
+.goals-fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 20px rgb(59 130 246 / 0.5);
+}
+
+.goals-fab:active {
+  transform: scale(0.95);
+}

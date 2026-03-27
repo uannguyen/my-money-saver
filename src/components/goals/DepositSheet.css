@@ -1,0 +1,133 @@
+.deposit-sheet {
+  position: relative;
+  overflow: visible;
+}
+
+.deposit-goal-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+.deposit-goal-icon {
+  font-size: 1.5rem;
+}
+
+.deposit-goal-name {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--color-text);
+}
+
+.deposit-quick-amounts {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.deposit-quick-btn {
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.deposit-quick-btn:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg, rgba(59, 130, 246, 0.1));
+}
+
+.deposit-quick-btn:active {
+  transform: scale(0.95);
+}
+
+/* Confetti */
+.confetti-container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.confetti-message {
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+  background: var(--color-surface);
+  padding: 16px 32px;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 0.2);
+  animation: confettiPop 0.4s ease;
+  z-index: 201;
+}
+
+.confetti-piece {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  animation: confettiFall 2.5s ease-out forwards;
+}
+
+.confetti-piece:nth-child(1) { left: 10%; background: #f44336; animation-delay: 0s; }
+.confetti-piece:nth-child(2) { left: 15%; background: #e91e63; animation-delay: 0.1s; }
+.confetti-piece:nth-child(3) { left: 20%; background: #9c27b0; animation-delay: 0.05s; }
+.confetti-piece:nth-child(4) { left: 25%; background: #673ab7; animation-delay: 0.15s; }
+.confetti-piece:nth-child(5) { left: 30%; background: #3f51b5; animation-delay: 0.08s; }
+.confetti-piece:nth-child(6) { left: 35%; background: #2196f3; animation-delay: 0.12s; }
+.confetti-piece:nth-child(7) { left: 40%; background: #03a9f4; animation-delay: 0.02s; }
+.confetti-piece:nth-child(8) { left: 45%; background: #00bcd4; animation-delay: 0.18s; }
+.confetti-piece:nth-child(9) { left: 50%; background: #009688; animation-delay: 0.07s; }
+.confetti-piece:nth-child(10) { left: 55%; background: #4caf50; animation-delay: 0.13s; }
+.confetti-piece:nth-child(11) { left: 60%; background: #8bc34a; animation-delay: 0.03s; }
+.confetti-piece:nth-child(12) { left: 65%; background: #cddc39; animation-delay: 0.16s; }
+.confetti-piece:nth-child(13) { left: 70%; background: #ffeb3b; animation-delay: 0.06s; }
+.confetti-piece:nth-child(14) { left: 75%; background: #ffc107; animation-delay: 0.11s; }
+.confetti-piece:nth-child(15) { left: 80%; background: #ff9800; animation-delay: 0.04s; }
+.confetti-piece:nth-child(16) { left: 85%; background: #ff5722; animation-delay: 0.14s; }
+.confetti-piece:nth-child(17) { left: 90%; background: #e91e63; animation-delay: 0.09s; }
+.confetti-piece:nth-child(18) { left: 5%; background: #3f51b5; animation-delay: 0.17s; }
+.confetti-piece:nth-child(19) { left: 50%; background: #f44336; animation-delay: 0.01s; }
+.confetti-piece:nth-child(20) { left: 30%; background: #4caf50; animation-delay: 0.19s; }
+
+@keyframes confettiFall {
+  0% {
+    top: -10%;
+    opacity: 1;
+    transform: rotateZ(0deg) scale(1);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    top: 100%;
+    opacity: 0;
+    transform: rotateZ(720deg) scale(0.5);
+  }
+}
+
+@keyframes confettiPop {
+  0% {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}

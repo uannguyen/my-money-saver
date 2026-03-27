@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
+import { useEffect } from 'react'
 import { useAuth } from './contexts/AuthContext'
 import { BottomNav } from './components/layout/BottomNav'
 import { LoginPage } from './pages/LoginPage'
@@ -6,8 +7,16 @@ import { HomePage } from './pages/HomePage'
 import { AddPage } from './pages/AddPage'
 import { StatsPage } from './pages/StatsPage'
 import { BudgetPage } from './pages/BudgetPage'
+import { GoalsPage } from './pages/GoalsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
+import { useTransactions } from './hooks/useTransactions'
+import { useBudget } from './hooks/useBudget'
+import { useBudgetAlerts } from './hooks/useBudgetAlerts'
+import { useRecurring } from './hooks/useRecurring'
+import { getMonthKey } from './utils/dateHelpers'
+import { ALL_DEFAULT_CATEGORIES } from './constants/categories'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -28,16 +37,30 @@ function ProtectedRoute({ children }) {
 }
 
 function AppLayout({ children }) {
+  const currentMonthKey = getMonthKey(new Date())
+  const { expenseByCategory } = useTransactions(currentMonthKey)
+  const { budgets } = useBudget(currentMonthKey, expenseByCategory)
+  const { alertCount } = useBudgetAlerts(budgets, ALL_DEFAULT_CATEGORIES)
+
   return (
     <>
       {children}
-      <BottomNav />
+      <BottomNav budgetAlertCount={alertCount} />
     </>
   )
 }
 
 export default function App() {
   const { user, loading } = useAuth()
+  const { processDueRecurrings, loading: recurringLoading } = useRecurring()
+
+  useEffect(() => {
+    if (user && !recurringLoading) {
+      processDueRecurrings().then((count) => {
+        if (count > 0) toast(`🔄 Đã tạo ${count} giao dịch định kỳ`)
+      })
+    }
+  }, [user, recurringLoading, processDueRecurrings])
 
   return (
     <>
@@ -109,6 +132,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AppLayout><BudgetPage /></AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/goals"
+          element={
+            <ProtectedRoute>
+              <AppLayout><GoalsPage /></AppLayout>
             </ProtectedRoute>
           }
         />

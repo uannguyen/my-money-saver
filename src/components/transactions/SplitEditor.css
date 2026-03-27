@@ -1,0 +1,9 @@
+.split-editor { display: flex; flex-direction: column; gap: 12px; }
+.split-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.875rem; }
+.split-total-match { color: var(--color-income); font-weight: 600; }
+.split-total-mismatch { color: var(--color-expense); font-weight: 600; }
+.split-item { display: flex; flex-direction: column; gap: 8px; padding: 12px; background: var(--color-bg); border-radius: var(--radius-md); position: relative; }
+.split-item-row { display: flex; gap: 8px; align-items: center; }
+.split-item-remove { position: absolute; top: 8px; right: 8px; background: none; border: none; cursor: pointer; color: var(--color-text-muted); font-size: 1.125rem; padding: 4px; }
+.split-add-btn { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 10px; border: 1.5px dashed var(--color-border); border-radius: var(--radius-md); background: transparent; color: var(--color-primary); font-size: 0.875rem; font-weight: 500; cursor: pointer; font-family: inherit; }
+.split-remaining { font-size: 0.8125rem; color: var(--color-text-muted); text-align: center; }

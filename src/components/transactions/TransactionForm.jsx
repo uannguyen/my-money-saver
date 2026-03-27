@@ -3,6 +3,7 @@ import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
 import { CategoryPicker } from './CategoryPicker'
+import { SplitEditor } from './SplitEditor'
 import { DateTimePickerModal } from './DateTimePickerModal'
 import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
 import './TransactionForm.css'
@@ -38,6 +39,8 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [submitting, setSubmitting] = useState(false)
   const [isRecurring, setIsRecurring] = useState(false)
   const [frequency, setFrequency] = useState('monthly')
+  const [isSplit, setIsSplit] = useState(initial?.splits?.length > 0 || false)
+  const [splits, setSplits] = useState(initial?.splits || [])
 
   // Find selected category info for display
   let selectedCat = allCats.find((c) => c.id === categoryId)
@@ -75,9 +78,29 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     e.preventDefault()
     const amount = parseVND(amountStr)
     if (!amount) return
-    if (!categoryId) {
-      setCategoryError('Vui lòng chọn danh mục')
-      return
+
+    if (isSplit) {
+      // Validate splits
+      const allHaveCategory = splits.every(s => s.categoryId)
+      const allHaveAmount = splits.every(s => Number(s.amount) > 0)
+      const splitsSum = splits.reduce((sum, s) => sum + (Number(s.amount) || 0), 0)
+      if (!allHaveCategory) {
+        setCategoryError('Vui lòng chọn danh mục cho tất cả phần chia')
+        return
+      }
+      if (!allHaveAmount) {
+        setCategoryError('Mỗi phần chia phải có số tiền > 0')
+        return
+      }
+      if (splitsSum !== amount) {
+        setCategoryError('Tổng các phần chia phải bằng số tiền giao dịch')
+        return
+      }
+    } else {
+      if (!categoryId) {
+        setCategoryError('Vui lòng chọn danh mục')
+        return
+      }
     }
 
     setSubmitting(true)
@@ -86,9 +109,10 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
       await onSubmit({
         type,
         amount,
-        categoryId,
+        categoryId: isSplit ? (splits[0]?.categoryId || '') : categoryId,
         date,
         note: note.trim(),
+        ...(isSplit ? { isSplit: true, splits } : {}),
         ...(isRecurring && !initial ? { isRecurring: true, frequency } : {}),
       })
     } finally {
@@ -135,6 +159,21 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <span className="txn-form-currency">đ</span>
       </div>
 
+      {/* Split Toggle */}
+      {parseVND(amountStr) > 0 && (
+        <button type="button" className="txn-split-toggle" onClick={() => { setIsSplit(!isSplit); if (!isSplit) setSplits([{ categoryId: '', amount: 0, note: '' }]) }}>
+          {isSplit ? '✕ Hủy chia' : '✂️ Chia giao dịch'}
+        </button>
+      )}
+
+      {/* Split Editor (replaces category selector when active) */}
+      {isSplit ? (
+        <div className="txn-form-section">
+          <label className="txn-form-label">Chia giao dịch</label>
+          <SplitEditor totalAmount={parseVND(amountStr)} splits={splits} onChange={setSplits} type={type} />
+        </div>
+      ) : (
+      <>
       {/* Category Selector (tap to open picker) */}
       <div className="txn-form-section">
         <label className="txn-form-label">Danh mục</label>
@@ -173,6 +212,8 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           }}
           onClose={() => setShowCategoryPicker(false)}
         />
+      )}
+      </>
       )}
 
       {/* Date & Time — dual trigger buttons */}

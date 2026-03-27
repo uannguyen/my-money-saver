@@ -1,0 +1,103 @@
+.goal-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.goal-card.goal-completed {
+  border-left: 3px solid #22c55e;
+}
+
+.goal-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.goal-card-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.goal-ring {
+  flex-shrink: 0;
+}
+
+.goal-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.goal-card-name {
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.goal-card-icon {
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.goal-check {
+  font-size: 0.875rem;
+}
+
+.goal-card-amounts {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.goal-card-remaining {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.goal-completed .goal-card-remaining {
+  color: #22c55e;
+}
+
+.goal-card-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.goal-card-deadline {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+}
+
+.goal-deadline-today {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.goal-deadline-passed {
+  color: var(--color-expense);
+  font-weight: 600;
+}
+
+.goal-card-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.goal-deposit-btn {
+  padding: 6px 12px !important;
+  font-size: 0.8125rem;
+}
+
+.goal-action-btn {
+  padding: 4px 8px !important;
+  font-size: 0.875rem;
+}

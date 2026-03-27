@@ -1,0 +1,61 @@
+.goal-form-dialog {
+  max-width: 420px;
+  width: 90%;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.goal-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.goal-form-icons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.goal-icon-btn {
+  width: 40px;
+  height: 40px;
+  font-size: 1.25rem;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s;
+}
+
+.goal-icon-btn.selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-bg, rgba(59, 130, 246, 0.1));
+}
+
+.goal-form-colors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.goal-color-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-full);
+  border: 3px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.goal-color-btn.selected {
+  border-color: var(--color-text);
+  transform: scale(1.15);
+}
+
+.goal-color-btn:hover {
+  transform: scale(1.1);
+}

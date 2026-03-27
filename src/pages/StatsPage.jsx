@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useBudget } from '../hooks/useBudget'
+import { useRecurring } from '../hooks/useRecurring'
 import { Header } from '../components/layout/Header'
 import { MonthlyBarChart } from '../components/charts/MonthlyBarChart'
 import { CategoryPieChart } from '../components/charts/CategoryPieChart'
@@ -8,6 +9,7 @@ import { MonthComparisonCard } from '../components/charts/MonthComparisonCard'
 import { TopTransactions } from '../components/charts/TopTransactions'
 import { WeekdayChart } from '../components/charts/WeekdayChart'
 import { MonthlySummaryCard } from '../components/charts/MonthlySummaryCard'
+import { ForecastCard } from '../components/charts/ForecastCard'
 import { formatVND } from '../utils/formatCurrency'
 import { getMonthKey, prevMonth } from '../utils/dateHelpers'
 import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
@@ -19,6 +21,7 @@ export function StatsPage() {
     useTransactions(monthKey)
   const { transactions: prevTransactions } = useTransactions(prevMonth(monthKey))
   const { budgets } = useBudget(monthKey, expenseByCategory)
+  const { recurrings } = useRecurring()
 
   // Top expense categories
   const topCategories = Object.entries(expenseByCategory)
@@ -39,6 +42,14 @@ export function StatsPage() {
         </div>
       ) : (
         <div className="stats-content">
+          {/* Cash Flow Forecast */}
+          <ForecastCard
+            totalIncome={totalIncome}
+            totalExpense={totalExpense}
+            recurrings={recurrings}
+            monthKey={monthKey}
+          />
+
           {/* Overview */}
           <div className="stats-overview card animate-fade-in-up">
             <div className="stats-overview-item">

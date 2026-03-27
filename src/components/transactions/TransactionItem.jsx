@@ -113,6 +113,7 @@ export function TransactionItem({ transaction, categories, onEdit, onDelete }) {
           <span className="txn-item-icon">{category.icon}</span>
           <div className="txn-item-info">
             <span className="txn-item-category">{category.name}</span>
+            {transaction.isSplit && <span className="txn-item-split-badge">✂️ Chia</span>}
             {transaction.note && (
               <span className="txn-item-note">{transaction.note}</span>
             )}

@@ -83,7 +83,13 @@ export function useTransactions(monthKey) {
   const expenseByCategory = transactions
     .filter((t) => t.type === 'expense')
     .reduce((acc, t) => {
-      acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount
+      if (t.isSplit && t.splits?.length > 0) {
+        t.splits.forEach(s => {
+          acc[s.categoryId] = (acc[s.categoryId] || 0) + s.amount
+        })
+      } else {
+        acc[t.categoryId] = (acc[t.categoryId] || 0) + t.amount
+      }
       return acc
     }, {})
 

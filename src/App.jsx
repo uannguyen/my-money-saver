@@ -7,6 +7,7 @@ import { HomePage } from './pages/HomePage'
 import { AddPage } from './pages/AddPage'
 import { StatsPage } from './pages/StatsPage'
 import { BudgetPage } from './pages/BudgetPage'
+import { GoalsPage } from './pages/GoalsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { Toaster } from 'react-hot-toast'
 import toast from 'react-hot-toast'
@@ -131,6 +132,14 @@ export default function App() {
           element={
             <ProtectedRoute>
               <AppLayout><BudgetPage /></AppLayout>
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/goals"
+          element={
+            <ProtectedRoute>
+              <AppLayout><GoalsPage /></AppLayout>
             </ProtectedRoute>
           }
         />

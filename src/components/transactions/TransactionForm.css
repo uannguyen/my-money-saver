@@ -249,3 +249,6 @@
   color: var(--color-primary);
   font-weight: 600;
 }
+
+/* ═══════ Split Toggle ═══════ */
+.txn-split-toggle { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; background: var(--color-bg); border: 1.5px dashed var(--color-border); border-radius: var(--radius-md); font-size: 0.875rem; color: var(--color-primary); cursor: pointer; width: 100%; font-weight: 500; font-family: inherit; }

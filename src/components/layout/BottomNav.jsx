@@ -5,6 +5,7 @@ const tabs = [
   { path: '/', icon: '🏠', label: 'Trang chủ' },
   { path: '/stats', icon: '📊', label: 'Thống kê' },
   { path: '/budget', icon: '💰', label: 'Ngân sách' },
+  { path: '/goals', icon: '🎯', label: 'Mục tiêu' },
   { path: '/settings', icon: '⚙️', label: 'Cài đặt' },
 ]
 

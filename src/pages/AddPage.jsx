@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { TransactionForm } from '../components/transactions/TransactionForm'
@@ -13,12 +14,14 @@ export function AddPage() {
   const { user } = useAuth()
   const { categories, fetchCategories } = useCategories()
   const editTxn = location.state?.transaction || null
+  const [formKey, setFormKey] = useState(0)
 
   const handleSubmit = async (data) => {
     try {
       if (editTxn) {
         await updateTransaction(user.uid, editTxn.id, data)
         toast.success('Đã cập nhật giao dịch')
+        navigate('/', { replace: true })
       } else {
         await addTransaction(user.uid, data)
 
@@ -39,8 +42,9 @@ export function AddPage() {
         } else {
           toast.success('Đã thêm giao dịch')
         }
+        // Reset form by bumping key, stay on page
+        setFormKey((k) => k + 1)
       }
-      navigate('/', { replace: true })
     } catch (err) {
       toast.error('Lưu thất bại: ' + err.message)
     }
@@ -59,6 +63,7 @@ export function AddPage() {
 
       <div className="card add-page-form">
         <TransactionForm
+          key={formKey}
           initial={editTxn}
           categories={categories}
           onCategoryAdded={fetchCategories}

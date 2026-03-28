@@ -4,6 +4,7 @@ import {
   deleteDoc,
   query,
   getDocs,
+  getDoc,
   doc,
   arrayUnion,
   arrayRemove,
@@ -106,3 +107,30 @@ export const getCustomCategories = getCustomParents
 export const addCustomCategory = (userId, data) => saveCustomParent(userId, data)
 export const updateCustomCategory = (userId, id, data) => updateCustomParent(userId, id, data)
 export const deleteCustomCategory = deleteCustomParent
+
+// ─── Pinned (Most Used) Categories ───────────────────────────────────────────
+
+function getPinnedDoc(userId) {
+  return doc(db, 'users', userId, 'settings', 'pinnedCategories')
+}
+
+/**
+ * Get the user's pinned "most used" category IDs.
+ * @returns {Promise<string[]>}
+ */
+export async function getPinnedCategories(userId) {
+  const ref = getPinnedDoc(userId)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return []
+  return snap.data().categoryIds || []
+}
+
+/**
+ * Save the user's pinned category IDs (overwrites previous list).
+ * @param {string} userId
+ * @param {string[]} categoryIds
+ */
+export async function savePinnedCategories(userId, categoryIds) {
+  const ref = getPinnedDoc(userId)
+  await setDoc(ref, { categoryIds, updatedAt: Timestamp.now() })
+}

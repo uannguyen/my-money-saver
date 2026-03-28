@@ -1,0 +1,106 @@
+.most-used-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.most-used-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--color-text);
+}
+
+.most-used-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+
+.most-used-header svg {
+  color: var(--color-text-muted);
+}
+
+/* ═══════ Grid: 4 cols × 2 rows ═══════ */
+.most-used-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.most-used-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 4px 10px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all 150ms ease;
+  font-family: inherit;
+  min-width: 0;
+}
+
+.most-used-item:hover {
+  border-color: var(--color-primary);
+  background: rgb(99 102 241 / 0.03);
+}
+
+.most-used-item.selected {
+  border-color: var(--color-primary);
+  background: rgb(99 102 241 / 0.08);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.most-used-item-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.most-used-item-name {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  line-height: 1.2;
+}
+
+.most-used-item.selected .most-used-item-name {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ═══════ Edit button variant ═══════ */
+.most-used-edit {
+  border-style: dashed;
+  border-color: var(--color-border);
+}
+
+.most-used-edit-icon {
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.most-used-edit .most-used-item-name {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.most-used-edit:hover {
+  border-color: var(--color-primary);
+  background: rgb(99 102 241 / 0.03);
+}

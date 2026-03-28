@@ -12,7 +12,7 @@ export default defineConfig({
       devOptions: {
         enabled: true
       },
-      includeAssets: ['favicon.svg', 'icons/*.svg', 'icons/*.png'],
+      includeAssets: ['favicon.png', 'icons/*.svg', 'icons/*.png'],
       manifest: {
         name: 'Chi Tiêu Cá Nhân',
         short_name: 'ChiTiêu',
@@ -24,7 +24,7 @@ export default defineConfig({
         scope: '/',
         start_url: '/',
         icons: [
-          { src: 'favicon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+          { src: 'favicon.png', sizes: '64x64', type: 'image/png', purpose: 'any' },
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
           { src: 'icons/icon-512-maskable.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' }

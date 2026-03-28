@@ -69,6 +69,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [splits, setSplits] = useState(initial?.splits || [])
   const [showEditMostUsed, setShowEditMostUsed] = useState(false)
   const userHasManuallySelected = useRef(false)
+  const hasAutoSelected = useRef(false)
 
   // Category suggestion
   const { transactions: recentTransactions } = useRecentTransactions(30)
@@ -90,6 +91,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     if (selectedCat && selectedCat.type !== type) {
       setCategoryId('')
       userHasManuallySelected.current = false
+      hasAutoSelected.current = false
     }
   }, [type])
 
@@ -98,9 +100,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     if (
       suggestions.length > 0 &&
       !userHasManuallySelected.current &&
+      !hasAutoSelected.current &&
       !initial?.categoryId
     ) {
       setCategoryId(suggestions[0].categoryId)
+      hasAutoSelected.current = true
     }
   }, [suggestions])
 

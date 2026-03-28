@@ -62,7 +62,7 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
       <div className="cpicker-modal">
         {/* Header */}
         <div className="cpicker-header">
-          <button className="cpicker-close" onClick={onClose}>
+          <button type="button" className="cpicker-close" onClick={onClose}>
             <X size={20} />
           </button>
           <h3 className="cpicker-title">Chọn danh mục</h3>
@@ -94,6 +94,7 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
                 {/* Parent row */}
                 <div className={`cpicker-parent-row ${selectedId === parent.id ? 'active' : ''}`}>
                   <button
+                    type="button"
                     className={`cpicker-parent-toggle ${isExpanded ? 'expanded' : ''}`}
                     onClick={() => toggleExpand(parent.id)}
                   >
@@ -102,6 +103,7 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
                     </span>
                   </button>
                   <button
+                    type="button"
                     className="cpicker-parent-select"
                     onClick={() => handleSelectParent(parent)}
                   >
@@ -117,6 +119,7 @@ export function CategoryPicker({ type, selectedId, onSelect, onClose }) {
                   <div className="cpicker-subs">
                     {parent.subs.map((sub) => (
                       <button
+                        type="button"
                         key={sub.id}
                         className={`cpicker-sub ${selectedId === sub.id ? 'active' : ''}`}
                         onClick={() => handleSelect(parent, sub)}

@@ -10,9 +10,11 @@ import { CategoryPicker } from './CategoryPicker'
 import { MostUsedCategories } from './MostUsedCategories'
 import { EditMostUsedModal } from './EditMostUsedModal'
 import { SplitEditor } from './SplitEditor'
+import { ImageAttachment } from './ImageAttachment'
 import { DateTimePickerModal } from './DateTimePickerModal'
 import { CalcKeyboard } from './CalcKeyboard'
-import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
+import { Clock, CalendarDays, ChevronRight, Camera } from 'lucide-react'
+import { useImageUpload } from '../../hooks/useImageUpload'
 import './TransactionForm.css'
 
 function evalExpressionForDisplay(expr) {
@@ -68,6 +70,16 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [isSplit, setIsSplit] = useState(initial?.splits?.length > 0 || false)
   const [splits, setSplits] = useState(initial?.splits || [])
   const [showEditMostUsed, setShowEditMostUsed] = useState(false)
+  const {
+    previewUrl: imagePreviewUrl,
+    imageFile,
+    uploading: imageUploading,
+    removed: imageRemoved,
+    initialImageUrl,
+    selectImage,
+    removeImage,
+    uploadImage,
+  } = useImageUpload(initial?.imageUrl)
   const userHasManuallySelected = useRef(false)
   const hasAutoSelected = useRef(false)
 
@@ -182,6 +194,9 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         categoryId: isSplit ? (splits[0]?.categoryId || '') : categoryId,
         date,
         note: note.trim(),
+        _imageFile: imageFile,
+        _existingImageUrl: initialImageUrl,
+        _imageRemoved: imageRemoved,
         ...(isSplit ? { isSplit: true, splits } : {}),
         ...(isRecurring && !initial ? { isRecurring: true, frequency } : {}),
       })
@@ -367,6 +382,16 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           value={note}
           onChange={(e) => setNote(e.target.value)}
           rows={2}
+        />
+      </div>
+
+      {/* Image Attachment */}
+      <div className="txn-form-section">
+        <ImageAttachment
+          previewUrl={imagePreviewUrl}
+          onSelectImage={selectImage}
+          onRemoveImage={removeImage}
+          uploading={imageUploading}
         />
       </div>
 

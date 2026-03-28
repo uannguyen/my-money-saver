@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { TransactionForm } from '../components/transactions/TransactionForm'
 import { useCategories } from '../hooks/useCategories'
 import { addTransaction, updateTransaction } from '../services/transactionService'
+import { uploadReceiptImage, deleteReceiptImage } from '../services/imageService'
 import { addRecurring, computeNextDueDate } from '../services/recurringService'
 import toast from 'react-hot-toast'
 import './AddPage.css'
@@ -18,12 +19,28 @@ export function AddPage() {
 
   const handleSubmit = async (data) => {
     try {
+      const { _imageFile, _existingImageUrl, _imageRemoved, ...txnData } = data
+
+      // Handle image upload/delete
+      let imageUrl = _existingImageUrl || null
+      if (_imageFile) {
+        imageUrl = await uploadReceiptImage(user.uid, _imageFile)
+        if (_existingImageUrl) {
+          deleteReceiptImage(_existingImageUrl)
+        }
+      } else if (_imageRemoved && _existingImageUrl) {
+        deleteReceiptImage(_existingImageUrl)
+        imageUrl = null
+      }
+
+      const finalData = { ...txnData, imageUrl }
+
       if (editTxn) {
-        await updateTransaction(user.uid, editTxn.id, data)
+        await updateTransaction(user.uid, editTxn.id, finalData)
         toast.success('Đã cập nhật giao dịch')
         navigate('/', { replace: true })
       } else {
-        await addTransaction(user.uid, data)
+        await addTransaction(user.uid, finalData)
 
         // Create recurring rule if enabled
         if (data.isRecurring && data.frequency) {

@@ -89,7 +89,7 @@ export default function App() {
                 <div className="spinner" />
               </div>
             ) : user ? (
-              <Navigate to="/" replace />
+              <Navigate to="/add" replace />
             ) : (
               <LoginPage />
             )
@@ -151,7 +151,7 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<Navigate to="/add" replace />} />
       </Routes>
     </>
   )

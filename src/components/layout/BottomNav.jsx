@@ -2,8 +2,8 @@ import { NavLink } from 'react-router-dom'
 import './BottomNav.css'
 
 const tabs = [
-  { path: '/', icon: '🏠', label: 'Trang chủ' },
   { path: '/stats', icon: '📊', label: 'Thống kê' },
+  { path: '/', icon: '💳', label: 'Giao dịch' },
   { path: '/budget', icon: '💰', label: 'Ngân sách' },
   { path: '/goals', icon: '🎯', label: 'Mục tiêu' },
   { path: '/settings', icon: '⚙️', label: 'Cài đặt' },

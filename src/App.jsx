@@ -1,4 +1,4 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+import { Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { useEffect } from 'react'
 import { useAuth } from './contexts/AuthContext'
 import { BottomNav } from './components/layout/BottomNav'
@@ -36,7 +36,7 @@ function ProtectedRoute({ children }) {
   return children
 }
 
-function AppLayout({ children }) {
+function AppLayout({ children, hideNav }) {
   const currentMonthKey = getMonthKey(new Date())
   const { expenseByCategory } = useTransactions(currentMonthKey)
   const { budgets } = useBudget(currentMonthKey, expenseByCategory)
@@ -45,7 +45,7 @@ function AppLayout({ children }) {
   return (
     <>
       {children}
-      <BottomNav budgetAlertCount={alertCount} />
+      {!hideNav && <BottomNav budgetAlertCount={alertCount} />}
     </>
   )
 }
@@ -53,6 +53,17 @@ function AppLayout({ children }) {
 export default function App() {
   const { user, loading } = useAuth()
   const { processDueRecurrings, loading: recurringLoading } = useRecurring()
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!sessionStorage.getItem('visited')) {
+      sessionStorage.setItem('visited', 'true')
+      if (location.pathname === '/') {
+        navigate('/add', { replace: true })
+      }
+    }
+  }, [location, navigate])
 
   useEffect(() => {
     if (user && !recurringLoading) {
@@ -96,7 +107,7 @@ export default function App() {
           }
         />
         <Route
-          path="/"
+          path="/transaction"
           element={
             <ProtectedRoute>
               <AppLayout><HomePage /></AppLayout>
@@ -107,7 +118,7 @@ export default function App() {
           path="/add"
           element={
             <ProtectedRoute>
-              <AddPage />
+              <AppLayout hideNav><AddPage /></AppLayout>
             </ProtectedRoute>
           }
         />
@@ -115,12 +126,12 @@ export default function App() {
           path="/edit/:id"
           element={
             <ProtectedRoute>
-              <AddPage />
+              <AppLayout hideNav><AddPage /></AppLayout>
             </ProtectedRoute>
           }
         />
         <Route
-          path="/stats"
+          path="/"
           element={
             <ProtectedRoute>
               <AppLayout><StatsPage /></AppLayout>

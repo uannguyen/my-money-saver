@@ -22,7 +22,7 @@ export default defineConfig({
         display: 'standalone',
         orientation: 'portrait',
         scope: '/',
-        start_url: '/',
+        start_url: '/add',
         icons: [
           { src: 'favicon.png', sizes: '64x64', type: 'image/png', purpose: 'any' },
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

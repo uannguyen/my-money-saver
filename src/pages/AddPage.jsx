@@ -38,7 +38,7 @@ export function AddPage() {
       if (editTxn) {
         await updateTransaction(user.uid, editTxn.id, finalData)
         toast.success('Đã cập nhật giao dịch')
-        navigate('/', { replace: true })
+        navigate('/transaction', { replace: true })
       } else {
         await addTransaction(user.uid, finalData)
 
@@ -70,7 +70,17 @@ export function AddPage() {
   return (
     <div className="page-container" id="add-page">
       <div className="add-page-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button
+          className="btn btn-ghost"
+          onClick={() => {
+            // If there's no previous state in our app (e.g. they landed directly here), go to /transaction
+            if (window.history.length <= 2) {
+              navigate('/transaction', { replace: true })
+            } else {
+              navigate(-1)
+            }
+          }}
+        >
           ← Quay lại
         </button>
         <h2 className="add-page-title">
@@ -85,7 +95,13 @@ export function AddPage() {
           categories={categories}
           onCategoryAdded={fetchCategories}
           onSubmit={handleSubmit}
-          onCancel={() => navigate(-1)}
+          onCancel={() => {
+            if (window.history.length <= 2) {
+              navigate('/transaction', { replace: true })
+            } else {
+              navigate(-1)
+            }
+          }}
         />
       </div>
     </div>

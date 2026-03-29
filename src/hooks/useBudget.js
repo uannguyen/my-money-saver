@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { SUB_IDS_BY_PARENT } from '../constants/categories'
 import {
   getBudgetsByMonth,
   addBudget as addBdg,
@@ -53,14 +54,19 @@ export function useBudget(monthKey, expenseByCategory = {}) {
   }
 
   // Enrich budgets with spent from expenseByCategory
-  const budgetsWithSpent = budgets.map((b) => ({
-    ...b,
-    spent: expenseByCategory[b.categoryId] || 0,
-    remaining: b.amount - (expenseByCategory[b.categoryId] || 0),
-    percentage: b.amount > 0
-      ? Math.round(((expenseByCategory[b.categoryId] || 0) / b.amount) * 100)
-      : 0,
-  }))
+  // If budget targets a parent category, aggregate all sub-category spending
+  const budgetsWithSpent = budgets.map((b) => {
+    const subIds = SUB_IDS_BY_PARENT.get(b.categoryId)
+    const spent = subIds
+      ? subIds.reduce((sum, sid) => sum + (expenseByCategory[sid] || 0), 0)
+      : (expenseByCategory[b.categoryId] || 0)
+    return {
+      ...b,
+      spent,
+      remaining: b.amount - spent,
+      percentage: b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0,
+    }
+  })
 
   return {
     budgets: budgetsWithSpent,

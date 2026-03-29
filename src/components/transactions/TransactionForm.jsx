@@ -1,23 +1,46 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getTodayDateTimeString } from '../../utils/dateHelpers'
 import { formatVND, parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
 import { useRecentTransactions } from '../../hooks/useRecentTransactions'
 import { useCategorySuggestion } from '../../hooks/useCategorySuggestion'
+import { useMostUsedCategories } from '../../hooks/useMostUsedCategories'
 import { useDebounce } from '../../hooks/useDebounce'
 import { CategoryPicker } from './CategoryPicker'
-import { CategorySuggestionChips } from './CategorySuggestionChips'
+import { MostUsedCategories } from './MostUsedCategories'
+import { EditMostUsedModal } from './EditMostUsedModal'
 import { SplitEditor } from './SplitEditor'
+import { ImageAttachment } from './ImageAttachment'
 import { DateTimePickerModal } from './DateTimePickerModal'
-import { Clock, CalendarDays, ChevronRight } from 'lucide-react'
+import { CalcKeyboard } from './CalcKeyboard'
+import { Clock, CalendarDays, ChevronRight, Camera } from 'lucide-react'
+import { useImageUpload } from '../../hooks/useImageUpload'
 import './TransactionForm.css'
+
+function evalExpressionForDisplay(expr) {
+  const safe = expr.replace(/×/g, '*').replace(/÷/g, '/')
+  if (!/^[\d+\-*/. ]+$/.test(safe)) return null
+  try {
+    const result = Function('"use strict"; return (' + safe + ')')()
+    if (!isFinite(result) || result < 0) return null
+    return Math.round(result)
+  } catch {
+    return null
+  }
+}
 
 // ─── Persist last-used datetime across consecutive transactions ─────────────
 const STORAGE_KEY = 'txn_last_datetime'
 
 function getInitialDateTime(initial) {
   if (initial?.date) {
-    return new Date(initial.date).toISOString().slice(0, 16)
+    const d = initial.date instanceof Date ? initial.date : new Date(initial.date)
+    const y = d.getFullYear()
+    const m = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    const h = String(d.getHours()).padStart(2, '0')
+    const min = String(d.getMinutes()).padStart(2, '0')
+    return `${y}-${m}-${day}T${h}:${min}`
   }
   const stored = sessionStorage.getItem(STORAGE_KEY)
   return stored || getTodayDateTimeString()
@@ -34,8 +57,9 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [showDateTimePicker, setShowDateTimePicker] = useState(false)
   const [pickerTab, setPickerTab] = useState('calendar')
   const [amountStr, setAmountStr] = useState(
-    initial?.amount ? formatVND(initial.amount).replace('đ', '') : ''
+    initial?.amount ? String(initial.amount) : ''
   )
+  const [showKeyboard, setShowKeyboard] = useState(false)
   const [categoryId, setCategoryId] = useState(initial?.categoryId || '')
   const [categoryError, setCategoryError] = useState('')
   const [date, setDate] = useState(() => getInitialDateTime(initial))
@@ -45,11 +69,28 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const [frequency, setFrequency] = useState('monthly')
   const [isSplit, setIsSplit] = useState(initial?.splits?.length > 0 || false)
   const [splits, setSplits] = useState(initial?.splits || [])
+  const [showEditMostUsed, setShowEditMostUsed] = useState(false)
+  const {
+    previewUrl: imagePreviewUrl,
+    imageFile,
+    uploading: imageUploading,
+    removed: imageRemoved,
+    initialImageUrl,
+    selectImage,
+    removeImage,
+    uploadImage,
+  } = useImageUpload(initial?.imageUrl)
+  const userHasManuallySelected = useRef(false)
+  const hasAutoSelected = useRef(false)
 
   // Category suggestion
   const { transactions: recentTransactions } = useRecentTransactions(30)
-  const debouncedAmount = useDebounce(parseVND(amountStr), 400)
+  const debouncedAmount = useDebounce(
+    (/[+\-×÷]/.test(amountStr) ? evalExpressionForDisplay(amountStr) : parseVND(amountStr)) || 0,
+    400
+  )
   const suggestions = useCategorySuggestion(recentTransactions, debouncedAmount, type)
+  const { mostUsed, pinnedIds, savePinned, refetch: refetchMostUsed } = useMostUsedCategories(type)
 
   // Find selected category info for display
   let selectedCat = allCats.find((c) => c.id === categoryId)
@@ -61,8 +102,23 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   useEffect(() => {
     if (selectedCat && selectedCat.type !== type) {
       setCategoryId('')
+      userHasManuallySelected.current = false
+      hasAutoSelected.current = false
     }
   }, [type])
+
+  // Auto-select top suggestion when amount changes
+  useEffect(() => {
+    if (
+      suggestions.length > 0 &&
+      !userHasManuallySelected.current &&
+      !hasAutoSelected.current &&
+      !initial?.categoryId
+    ) {
+      setCategoryId(suggestions[0].categoryId)
+      hasAutoSelected.current = true
+    }
+  }, [suggestions])
 
   // Clear category error when a category is selected
   useEffect(() => {
@@ -79,13 +135,30 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     setAmountStr(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'))
   }
 
+  // Get numeric value from expression or plain string
+  const getAmountValue = () => {
+    const hasOp = /[+\-×÷]/.test(amountStr)
+    if (hasOp) return evalExpressionForDisplay(amountStr) || 0
+    return parseVND(amountStr)
+  }
+
+  // Format expression for display: format each number segment with dot separators
+  const displayAmountStr = () => {
+    if (!amountStr) return ''
+    // Split on operators, keeping delimiters
+    return amountStr.replace(/(\d+)/g, (n) => {
+      const num = parseInt(n, 10)
+      return isNaN(num) ? n : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    })
+  }
+
   const setCurrentTime = () => {
     setDate(getTodayDateTimeString())
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    const amount = parseVND(amountStr)
+    const amount = getAmountValue()
     if (!amount) return
 
     if (isSplit) {
@@ -121,6 +194,9 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         categoryId: isSplit ? (splits[0]?.categoryId || '') : categoryId,
         date,
         note: note.trim(),
+        _imageFile: imageFile,
+        _existingImageUrl: initialImageUrl,
+        _imageRemoved: imageRemoved,
         ...(isSplit ? { isSplit: true, splits } : {}),
         ...(isRecurring && !initial ? { isRecurring: true, frequency } : {}),
       })
@@ -154,51 +230,65 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         </button>
       </div>
 
-      {/* Amount Input */}
-      <div className="txn-form-amount-wrapper">
-        <input
-          type="text"
-          inputMode="numeric"
-          className="amount-input"
-          placeholder="0"
-          value={amountStr}
-          onChange={handleAmountChange}
-          autoFocus
-        />
+      {/* Amount Display — tap to open calculator keyboard */}
+      <div
+        className={`txn-form-amount-wrapper${showKeyboard ? ' is-active' : ''}`}
+        onClick={() => setShowKeyboard(true)}
+        style={{ cursor: 'pointer' }}
+        role="button"
+        aria-label="Nhập số tiền"
+      >
+        <span className="amount-input" style={{ minWidth: 80, textAlign: 'right' }}>
+          {displayAmountStr() || <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>0</span>}
+        </span>
         <span className="txn-form-currency">đ</span>
       </div>
 
-      {/* Smart category suggestions */}
+      {/* Calculator Keyboard */}
+      {showKeyboard && (
+        <CalcKeyboard
+          expression={amountStr}
+          onChange={setAmountStr}
+          onDone={() => setShowKeyboard(false)}
+        />
+      )}
+
+      {/* Most Used category grid */}
       {!isSplit && (
-        <CategorySuggestionChips
-          suggestions={suggestions}
+        <MostUsedCategories
+          mostUsed={mostUsed}
           selectedCategoryId={categoryId}
           onSelect={(id) => {
+            userHasManuallySelected.current = true
             setCategoryId(id)
             setCategoryError('')
           }}
+          onEdit={() => setShowEditMostUsed(true)}
           categories={allCats}
         />
       )}
 
-      {/* Split Toggle */}
-      {parseVND(amountStr) > 0 && (
-        <button type="button" className="txn-split-toggle" onClick={() => { setIsSplit(!isSplit); if (!isSplit) setSplits([{ categoryId: '', amount: 0, note: '' }]) }}>
-          {isSplit ? '✕ Hủy chia' : '✂️ Chia giao dịch'}
-        </button>
+      {/* Edit Most Used Modal */}
+      {showEditMostUsed && (
+        <EditMostUsedModal
+          pinnedIds={pinnedIds}
+          onSave={async (ids) => {
+            await savePinned(ids)
+            refetchMostUsed()
+          }}
+          onClose={() => setShowEditMostUsed(false)}
+        />
       )}
 
-      {/* Split Editor (replaces category selector when active) */}
+      {/* Split Editor OR Category Selector */}
       {isSplit ? (
         <div className="txn-form-section">
-          <label className="txn-form-label">Chia giao dịch</label>
-          <SplitEditor totalAmount={parseVND(amountStr)} splits={splits} onChange={setSplits} type={type} />
+          <SplitEditor totalAmount={getAmountValue()} splits={splits} onChange={setSplits} type={type} />
         </div>
       ) : (
       <>
       {/* Category Selector (tap to open picker) */}
       <div className="txn-form-section">
-        <label className="txn-form-label">Danh mục</label>
         <button
           type="button"
           className={`txn-cat-selector ${selectedCat ? 'has-value' : ''} ${categoryError ? 'has-error' : ''}`}
@@ -240,7 +330,6 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
 
       {/* Date & Time — dual trigger buttons */}
       <div className="txn-form-section">
-        <label className="txn-form-label">Ngày giờ</label>
         <div style={{ display: 'flex', gap: 8 }}>
           <button
             type="button"
@@ -287,7 +376,6 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
 
       {/* Note */}
       <div className="txn-form-section">
-        <label className="txn-form-label">Ghi chú</label>
         <textarea
           className="input txn-form-note"
           placeholder="Thêm ghi chú..."
@@ -296,6 +384,23 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           rows={2}
         />
       </div>
+
+      {/* Image Attachment */}
+      <div className="txn-form-section">
+        <ImageAttachment
+          previewUrl={imagePreviewUrl}
+          onSelectImage={selectImage}
+          onRemoveImage={removeImage}
+          uploading={imageUploading}
+        />
+      </div>
+
+      {/* Split Toggle — after note */}
+      {getAmountValue() > 0 && (
+        <button type="button" className="txn-split-toggle" onClick={() => { setIsSplit(!isSplit); if (!isSplit) setSplits([{ categoryId: '', amount: 0, note: '' }]) }}>
+          {isSplit ? '✕ Hủy chia' : '✂️ Chia giao dịch'}
+        </button>
+      )}
 
       {/* Recurring Toggle (only for new transactions) */}
       {!initial && (
@@ -339,7 +444,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         <button
           type="submit"
           className="btn btn-primary txn-form-submit"
-          disabled={!parseVND(amountStr) || submitting}
+          disabled={!getAmountValue() || submitting}
         >
           {submitting ? 'Đang lưu...' : initial ? 'Cập nhật' : 'Lưu'}
         </button>

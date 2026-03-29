@@ -1,0 +1,120 @@
+/* ─── Calculator Keyboard ─────────────────────────────────────────────────── */
+
+.calc-keyboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  gap: 6px;
+  padding: 10px 10px 14px;
+  background: #f1f2f6;
+  border-top: 1px solid #e2e4eb;
+  /* prevent rubber-band scroll on iOS when tapping */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ─── Base key ─────────────────────────────────────────────────────────────── */
+.calc-key {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  border: none;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 1.3rem;
+  font-weight: 600;
+  cursor: pointer;
+  touch-action: manipulation; /* eliminate 300ms tap delay */
+  -webkit-tap-highlight-color: transparent;
+  transition: background 120ms ease, box-shadow 120ms ease, transform 100ms ease;
+  /* subtle depth */
+  box-shadow: 0 2px 0 rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+.calc-key:active {
+  transform: scale(0.94) translateY(1px);
+  box-shadow: 0 0 0 rgba(0,0,0,0.10);
+}
+
+/* ─── Number keys ─────────────────────────────────────────────────────────── */
+.calc-key--num {
+  background: #ffffff;
+  color: #1e1e2e;
+  font-size: 1.3rem;
+}
+
+.calc-key--num:hover {
+  background: #f8f8fc;
+}
+
+/* ─── Operator keys (+, -, ×, ÷) ──────────────────────────────────────────── */
+.calc-key--op {
+  background: #eef0fb;
+  color: #6366f1;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.calc-key--op:hover {
+  background: #e4e6f8;
+}
+
+.calc-key--op:active {
+  background: #d8daef;
+}
+
+/* ─── Function keys (AC, ⌫) ───────────────────────────────────────────────── */
+.calc-key--fn {
+  background: #e8eaf0;
+  color: #475569;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.calc-key--fn:hover {
+  background: #dde0ea;
+}
+
+/* ─── Done key ────────────────────────────────────────────────────────────── */
+.calc-key--done {
+  background: linear-gradient(160deg, #6366f1 0%, #4f52d8 100%);
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.40), 0 2px 0 rgba(0,0,0,0.08);
+  border-radius: 14px;
+  /* spans rows 4-5 */
+  min-height: unset;
+}
+
+.calc-key--done:hover {
+  background: linear-gradient(160deg, #5558e8 0%, #4446c9 100%);
+  box-shadow: 0 6px 16px rgba(99, 102, 241, 0.50);
+}
+
+.calc-key--done:active {
+  transform: scale(0.96) translateY(1px);
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.30);
+}
+
+/* ─── Accessibility: focus ring ──────────────────────────────────────────── */
+.calc-key:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+/* ─── Reduced motion ─────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .calc-key {
+    transition: none;
+  }
+  .calc-key:active {
+    transform: none;
+  }
+}

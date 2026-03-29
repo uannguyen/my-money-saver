@@ -1,8 +1,10 @@
+import { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { TransactionForm } from '../components/transactions/TransactionForm'
 import { useCategories } from '../hooks/useCategories'
 import { addTransaction, updateTransaction } from '../services/transactionService'
+import { uploadReceiptImage, deleteReceiptImage } from '../services/imageService'
 import { addRecurring, computeNextDueDate } from '../services/recurringService'
 import toast from 'react-hot-toast'
 import './AddPage.css'
@@ -13,14 +15,32 @@ export function AddPage() {
   const { user } = useAuth()
   const { categories, fetchCategories } = useCategories()
   const editTxn = location.state?.transaction || null
+  const [formKey, setFormKey] = useState(0)
 
   const handleSubmit = async (data) => {
     try {
+      const { _imageFile, _existingImageUrl, _imageRemoved, ...txnData } = data
+
+      // Handle image upload/delete
+      let imageUrl = _existingImageUrl || null
+      if (_imageFile) {
+        imageUrl = await uploadReceiptImage(user.uid, _imageFile)
+        if (_existingImageUrl) {
+          deleteReceiptImage(_existingImageUrl)
+        }
+      } else if (_imageRemoved && _existingImageUrl) {
+        deleteReceiptImage(_existingImageUrl)
+        imageUrl = null
+      }
+
+      const finalData = { ...txnData, imageUrl }
+
       if (editTxn) {
-        await updateTransaction(user.uid, editTxn.id, data)
+        await updateTransaction(user.uid, editTxn.id, finalData)
         toast.success('Đã cập nhật giao dịch')
+        navigate('/transaction', { replace: true })
       } else {
-        await addTransaction(user.uid, data)
+        await addTransaction(user.uid, finalData)
 
         // Create recurring rule if enabled
         if (data.isRecurring && data.frequency) {
@@ -39,8 +59,9 @@ export function AddPage() {
         } else {
           toast.success('Đã thêm giao dịch')
         }
+        // Reset form by bumping key, stay on page
+        setFormKey((k) => k + 1)
       }
-      navigate('/', { replace: true })
     } catch (err) {
       toast.error('Lưu thất bại: ' + err.message)
     }
@@ -49,7 +70,17 @@ export function AddPage() {
   return (
     <div className="page-container" id="add-page">
       <div className="add-page-header">
-        <button className="btn btn-ghost" onClick={() => navigate(-1)}>
+        <button
+          className="btn btn-ghost"
+          onClick={() => {
+            // If there's no previous state in our app (e.g. they landed directly here), go to /transaction
+            if (window.history.length <= 2) {
+              navigate('/transaction', { replace: true })
+            } else {
+              navigate(-1)
+            }
+          }}
+        >
           ← Quay lại
         </button>
         <h2 className="add-page-title">
@@ -59,11 +90,18 @@ export function AddPage() {
 
       <div className="card add-page-form">
         <TransactionForm
+          key={formKey}
           initial={editTxn}
           categories={categories}
           onCategoryAdded={fetchCategories}
           onSubmit={handleSubmit}
-          onCancel={() => navigate(-1)}
+          onCancel={() => {
+            if (window.history.length <= 2) {
+              navigate('/transaction', { replace: true })
+            } else {
+              navigate(-1)
+            }
+          }}
         />
       </div>
     </div>

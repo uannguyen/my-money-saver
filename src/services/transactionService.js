@@ -4,6 +4,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  getDoc,
   query,
   where,
   orderBy,
@@ -11,6 +12,7 @@ import {
   Timestamp,
 } from 'firebase/firestore'
 import { db } from './firebase'
+import { deleteReceiptImage } from './imageService'
 
 function getTransactionsRef(userId) {
   return collection(db, 'users', userId, 'transactions')
@@ -26,6 +28,7 @@ export async function addTransaction(userId, data) {
     amount: Number(data.amount),
     categoryId: data.categoryId,
     note: data.note || '',
+    imageUrl: data.imageUrl || null,
     date: Timestamp.fromDate(new Date(data.date)),
     createdAt: Timestamp.now(),
     ...(data.isSplit && {
@@ -51,6 +54,7 @@ export async function updateTransaction(userId, transactionId, data) {
     amount: Number(data.amount),
     categoryId: data.categoryId,
     note: data.note || '',
+    imageUrl: data.imageUrl || null,
     date: Timestamp.fromDate(new Date(data.date)),
     ...(data.isSplit && {
       isSplit: true,
@@ -70,6 +74,13 @@ export async function updateTransaction(userId, transactionId, data) {
  */
 export async function deleteTransaction(userId, transactionId) {
   const ref = doc(db, 'users', userId, 'transactions', transactionId)
+  const snapshot = await getDoc(ref)
+  if (snapshot.exists()) {
+    const data = snapshot.data()
+    if (data.imageUrl) {
+      deleteReceiptImage(data.imageUrl)
+    }
+  }
   await deleteDoc(ref)
 }
 

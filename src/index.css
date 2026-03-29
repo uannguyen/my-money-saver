@@ -201,15 +201,15 @@ body {
 
 /* ===== Amount Input (Large) ===== */
 .amount-input {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 700;
-  text-align: center;
+  text-align: right;
   border: none;
   background: transparent;
   color: var(--color-text);
   width: 100%;
   outline: none;
-  padding: 8px;
+  padding: 4px;
 }
 
 .amount-input::placeholder {

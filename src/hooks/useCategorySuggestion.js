@@ -87,7 +87,7 @@ export function useCategorySuggestion(recentTransactions, inputAmount, type = 'e
     return Object.entries(scoreMap)
       .filter(([, score]) => score > 0)
       .sort(([, a], [, b]) => b - a)
-      .slice(0, 3)
+      .slice(0, 1)
       .map(([categoryId, score]) => ({ categoryId, score }))
   }, [recentTransactions, inputAmount, type])
 

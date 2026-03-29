@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useBudget } from '../hooks/useBudget'
 import { useBudgetAlerts } from '../hooks/useBudgetAlerts'
@@ -6,13 +6,12 @@ import { useInsights } from '../hooks/useInsights'
 import { useRecurring } from '../hooks/useRecurring'
 import { Header } from '../components/layout/Header'
 import { TransactionList } from '../components/transactions/TransactionList'
-import { QuickAddSheet } from '../components/transactions/QuickAddSheet'
 import { InsightCard } from '../components/common/InsightCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { formatVND } from '../utils/formatCurrency'
 import { getMonthKey, prevMonth, formatDate } from '../utils/dateHelpers'
 import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
-import { addTransaction } from '../services/transactionService'
+
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -33,8 +32,6 @@ export function HomePage() {
   const { upcoming3Days } = useRecurring()
   const navigate = useNavigate()
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [showQuickAdd, setShowQuickAdd] = useState(false)
-  const fabTimerRef = useRef(null)
 
   useEffect(() => {
     if (budgets.length > 0) {
@@ -53,36 +50,6 @@ export function HomePage() {
     setDeleteTarget(null)
   }
 
-  const handleQuickSave = useCallback(async (data) => {
-    if (!user) return
-    try {
-      await addTransaction(user.uid, data)
-      await refetch()
-      toast.success('Đã thêm giao dịch')
-      setShowQuickAdd(false)
-    } catch {
-      toast.error('Thêm thất bại')
-    }
-  }, [user, refetch])
-
-  const handleFabTouchStart = () => {
-    fabTimerRef.current = setTimeout(() => {
-      fabTimerRef.current = null
-      navigator.vibrate?.(50)
-      setShowQuickAdd(true)
-    }, 500)
-  }
-
-  const handleFabTouchEnd = (e) => {
-    if (fabTimerRef.current) {
-      // Short tap — let onClick handle navigate('/add')
-      clearTimeout(fabTimerRef.current)
-      fabTimerRef.current = null
-    } else {
-      // Long press already handled, prevent click
-      e.preventDefault()
-    }
-  }
 
   return (
     <div className="page-container" id="home-page">
@@ -142,23 +109,15 @@ export function HomePage() {
         />
       )}
 
-      {/* FAB — click/tap: /add, long press (touch): quick add */}
+      {/* FAB */}
       <button
         className="fab"
         id="fab-add"
         aria-label="Thêm giao dịch"
-        onTouchStart={handleFabTouchStart}
-        onTouchEnd={handleFabTouchEnd}
         onClick={() => navigate('/add')}
       >
         +
       </button>
-
-      <QuickAddSheet
-        open={showQuickAdd}
-        onClose={() => setShowQuickAdd(false)}
-        onSave={handleQuickSave}
-      />
 
       <ConfirmDialog
         open={!!deleteTarget}

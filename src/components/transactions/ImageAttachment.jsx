@@ -1,9 +1,10 @@
-import { useRef } from 'react'
-import { Camera, X } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { Camera, X, ZoomIn } from 'lucide-react'
 import './ImageAttachment.css'
 
 export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uploading }) {
   const fileInputRef = useRef(null)
+  const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0]
@@ -25,7 +26,20 @@ export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uplo
 
       {previewUrl ? (
         <div className="img-attach-preview">
-          <img src={previewUrl} alt="Hóa đơn" className="img-attach-img" />
+          {/* Preview image — tap to open lightbox */}
+          <img
+            src={previewUrl}
+            alt="Hóa đơn"
+            className="img-attach-img"
+            onClick={() => setLightboxOpen(true)}
+          />
+
+          {/* Zoom hint */}
+          <div className="img-attach-zoom-hint" onClick={() => setLightboxOpen(true)}>
+            <ZoomIn size={14} />
+            <span>Xem toàn bộ</span>
+          </div>
+
           {uploading && (
             <div className="img-attach-uploading">
               <div className="img-attach-spinner" />
@@ -49,6 +63,26 @@ export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uplo
           <Camera size={18} />
           <span>Đính kèm hóa đơn</span>
         </button>
+      )}
+
+      {/* Lightbox */}
+      {lightboxOpen && (
+        <div className="img-lightbox-backdrop" onClick={() => setLightboxOpen(false)}>
+          <button
+            type="button"
+            className="img-lightbox-close"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Đóng"
+          >
+            <X size={20} />
+          </button>
+          <img
+            src={previewUrl}
+            alt="Hóa đơn (full)"
+            className="img-lightbox-img"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
       )}
     </div>
   )

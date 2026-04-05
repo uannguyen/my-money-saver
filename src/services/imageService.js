@@ -55,10 +55,62 @@ export async function uploadReceiptImage(userId, file) {
   return data.secure_url
 }
 
+/** Extract Cloudinary public_id from a secure_url */
+function extractPublicId(imageUrl) {
+  try {
+    const url = new URL(imageUrl)
+    // pathname: /da4omyjfo/image/upload/v1234567890/receipts/uid/filename.jpg
+    const parts = url.pathname.split('/')
+    const uploadIdx = parts.indexOf('upload')
+    if (uploadIdx === -1) return null
+    // skip version segment (vXXXXXX) if present
+    let startIdx = uploadIdx + 1
+    if (parts[startIdx] && /^v\d+$/.test(parts[startIdx])) startIdx++
+    const withExt = parts.slice(startIdx).join('/')
+    // remove extension
+    return withExt.replace(/\.[^.]+$/, '')
+  } catch {
+    return null
+  }
+}
+
+/** Generate SHA-1 signature (plain digest, as required by Cloudinary) */
+async function sha1(message) {
+  const enc = new TextEncoder()
+  const buf = await crypto.subtle.digest('SHA-1', enc.encode(message))
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+}
+
 /**
- * Cloudinary deletion requires API secret (không nên expose ở client).
- * Ảnh sẽ còn trong Cloudinary nhưng không hiển thị trong app nữa.
+ * Delete a receipt image from Cloudinary using the authenticated destroy API.
+ * Silently ignores errors so image absence never blocks the main delete flow.
  */
-export async function deleteReceiptImage(_imageUrl) {
-  // no-op: deletion cần server-side API secret
+export async function deleteReceiptImage(imageUrl) {
+  if (!imageUrl) return
+  const publicId = extractPublicId(imageUrl)
+  if (!publicId) return
+
+  try {
+    const API_KEY = import.meta.env.VITE_CLOUDINARY_API_KEY
+    const API_SECRET = import.meta.env.VITE_CLOUDINARY_API_SECRET
+    const CLOUD = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME
+    const timestamp = Math.floor(Date.now() / 1000)
+    const toSign = `public_id=${publicId}&timestamp=${timestamp}${API_SECRET}`
+    const signature = await sha1(toSign)
+
+    const form = new FormData()
+    form.append('public_id', publicId)
+    form.append('timestamp', timestamp)
+    form.append('api_key', API_KEY)
+    form.append('signature', signature)
+
+    await fetch(`https://api.cloudinary.com/v1_1/${CLOUD}/image/destroy`, {
+      method: 'POST',
+      body: form,
+    })
+  } catch {
+    // Silent fail – do not block the caller
+  }
 }

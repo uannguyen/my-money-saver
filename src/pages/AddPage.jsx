@@ -16,8 +16,10 @@ export function AddPage() {
   const { categories, fetchCategories } = useCategories()
   const editTxn = location.state?.transaction || null
   const [formKey, setFormKey] = useState(0)
+  const [isSaving, setIsSaving] = useState(false)
 
   const handleSubmit = async (data) => {
+    setIsSaving(true)
     try {
       const { _imageFile, _existingImageUrl, _imageRemoved, ...txnData } = data
 
@@ -64,6 +66,8 @@ export function AddPage() {
       }
     } catch (err) {
       toast.error('Lưu thất bại: ' + err.message)
+    } finally {
+      setIsSaving(false)
     }
   }
 
@@ -104,6 +108,13 @@ export function AddPage() {
           }}
         />
       </div>
+
+      {isSaving && (
+        <div className="overlay" style={{ zIndex: 9999, flexDirection: 'column', gap: '16px' }}>
+          <div className="spinner" style={{ borderColor: 'rgba(255, 255, 255, 0.2)', borderTopColor: '#ffffff', width: '40px', height: '40px' }}></div>
+          <div style={{ color: 'white', fontWeight: 600, fontSize: '1rem' }}>Đang lưu giao dịch...</div>
+        </div>
+      )}
     </div>
   )
 }

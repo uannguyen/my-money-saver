@@ -6,7 +6,7 @@ function evalExpression(expr) {
   try {
     const result = Function('"use strict"; return (' + safe + ')')()
     if (!isFinite(result) || result < 0) return null
-    return Math.round(result)
+    return Math.round(result * 100) / 100
   } catch {
     return null
   }

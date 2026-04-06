@@ -87,12 +87,16 @@ Quản lý tài khoản, tuỳ chỉnh danh mục, cấu hình giao dịch đị
 ## Tính năng chính
 
 - **Quản lý thu chi** — thêm, sửa, xoá giao dịch; phân loại 2 cấp (danh mục cha / con)
+- **Bàn phím máy tính** — nhập số tiền với phép tính (+, -, ×, ÷), hỗ trợ số thập phân
 - **Gợi ý danh mục thông minh** — phân tích lịch sử 30 ngày + khung giờ để gợi ý top 3
-- **Ngân sách theo tháng** — cảnh báo khi gần hoặc vượt hạn mức
-- **Mục tiêu tiết kiệm** — đặt mục tiêu và nạp tiền từng phần
+- **Đính kèm hình ảnh** — chụp hoá đơn/biên lai, upload lên Cloudinary, xem ảnh full-size với lightbox
+- **Ngân sách theo tháng** — đặt hạn mức theo danh mục, cảnh báo khi gần/vượt ngân sách (hiển thị badge trên nav)
+- **Mục tiêu tiết kiệm** — đặt mục tiêu và nạp tiền từng phần, theo dõi tiến độ
 - **Giao dịch định kỳ** — tự động tạo giao dịch theo lịch hàng ngày/tuần/tháng/năm
 - **Chia giao dịch** — split một giao dịch thành nhiều danh mục khác nhau
-- **Thống kê nâng cao** — biểu đồ, phân tích xu hướng, so sánh tháng, dự báo dòng tiền
+- **Thống kê nâng cao** — biểu đồ tròn theo danh mục, biểu đồ cột theo tháng, phân tích theo ngày trong tuần, so sánh tháng trước, dự báo dòng tiền, top giao dịch lớn nhất
+- **Insights** — phân tích chi tiêu tự động với các gợi ý cải thiện
+- **Xuất Excel** — export giao dịch ra file `.xlsx`
 - **PWA** — cài đặt như app native trên điện thoại, hỗ trợ offline
 
 ---
@@ -113,9 +117,11 @@ npm run dev
 npm run build
 ```
 
-### Cấu hình Firebase
+### Cấu hình Firebase & Cloudinary
 
-Tạo project Firebase tại [console.firebase.google.com](https://console.firebase.google.com), bật **Firestore** và **Google Auth**, rồi điền vào `.env`:
+Tạo project Firebase tại [console.firebase.google.com](https://console.firebase.google.com), bật **Firestore** và **Google Auth**. Tạo tài khoản Cloudinary tại [cloudinary.com](https://cloudinary.com) để lưu trữ hình ảnh.
+
+Điền vào `.env`:
 
 ```
 VITE_FIREBASE_API_KEY=
@@ -124,6 +130,11 @@ VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
+VITE_MEASUREMENT_ID=
+VITE_CLOUDINARY_CLOUD_NAME=
+VITE_CLOUDINARY_UPLOAD_PRESET=
+VITE_CLOUDINARY_API_KEY=
+VITE_CLOUDINARY_API_SECRET=
 ```
 
 ---
@@ -145,9 +156,9 @@ src/
 
 ```
 users/{userId}/
-  transactions/   { type, amount, categoryId, note, date, createdAt, [isSplit, splits] }
-  budgets/        { categoryId, amount, month: 'YYYY-MM' }
-  categories/     (danh mục tuỳ chỉnh của user)
-  recurring/      { type, amount, categoryId, frequency, nextDueDate, isActive }
-  goals/          { name, targetAmount, currentAmount, deadline }
+  transactions/            { type, amount, categoryId, note, date, createdAt, imageUrl?, [isSplit, splits] }
+  budgets/                 { categoryId, amount, month: 'YYYY-MM' }
+  categories/              (danh mục tuỳ chỉnh của user)
+  recurringTransactions/   { type, amount, categoryId, frequency, nextDueDate, isActive }
+  savingsGoals/            { name, targetAmount, currentAmount, deadline }
 ```

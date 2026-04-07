@@ -86,7 +86,12 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   // Category suggestion
   const { transactions: recentTransactions } = useRecentTransactions(30)
   const debouncedAmount = useDebounce(
-    (/[+\-×÷]/.test(amountStr) ? evalExpressionForDisplay(amountStr) : parseVND(amountStr)) || 0,
+    (/[+\-×÷]/.test(amountStr)
+      ? evalExpressionForDisplay(amountStr)
+      : amountStr.includes('.')
+        ? (parseInt(amountStr.replace('.', ''), 10) || 0)
+        : parseVND(amountStr)
+    ) || 0,
     400
   )
   const suggestions = useCategorySuggestion(recentTransactions, debouncedAmount, type)
@@ -139,13 +144,23 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const getAmountValue = () => {
     const hasOp = /[+\-×÷]/.test(amountStr)
     if (hasOp) return evalExpressionForDisplay(amountStr) || 0
+    // Decimal notation: "11.5000" → remove dot → 115000 (user shifts decimal with 000 presses)
+    if (amountStr.includes('.')) {
+      const val = parseInt(amountStr.replace('.', ''), 10)
+      return isNaN(val) ? 0 : val
+    }
     return parseVND(amountStr)
   }
 
   // Format expression for display: format each number segment with dot separators
   const displayAmountStr = () => {
     if (!amountStr) return ''
-    // Split on operators, keeping delimiters
+    // Decimal notation ending with 0: "11.5000" → remove dot → 115000 → "115.000"
+    if (!(/[+\-×÷]/.test(amountStr)) && amountStr.includes('.') && amountStr.endsWith('0')) {
+      const num = parseInt(amountStr.replace('.', ''), 10)
+      if (!isNaN(num)) return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    }
+    // Otherwise format each numeric segment (handles operators and trailing decimals like "11.5")
     return amountStr.replace(/(\d+)/g, (n) => {
       const num = parseInt(n, 10)
       return isNaN(num) ? n : num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')

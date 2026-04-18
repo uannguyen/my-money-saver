@@ -24,6 +24,26 @@
   background: rgba(99, 102, 241, 0.04);
 }
 
+/* 2-button row layout */
+.img-attach-actions {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.img-attach-actions .img-attach-btn {
+  flex: 1;
+  font-size: 0.82rem;
+  padding: 10px 8px;
+}
+
+/* Gallery button — slightly different tint to distinguish from camera */
+.img-attach-btn--gallery {
+  border-style: solid;
+  border-color: var(--color-border);
+  background: var(--color-surface-2, rgba(0,0,0,0.03));
+}
+
 .img-attach-preview {
   position: relative;
   width: 100%;

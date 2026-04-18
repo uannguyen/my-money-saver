@@ -1,9 +1,10 @@
 import { useRef, useState } from 'react'
-import { Camera, X, ZoomIn } from 'lucide-react'
+import { Camera, ImageIcon, X, ZoomIn } from 'lucide-react'
 import './ImageAttachment.css'
 
 export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uploading }) {
-  const fileInputRef = useRef(null)
+  const cameraInputRef = useRef(null)   // capture="environment" — inline camera
+  const galleryInputRef = useRef(null)  // gallery picker
   const [lightboxOpen, setLightboxOpen] = useState(false)
 
   const handleFileChange = (e) => {
@@ -16,10 +17,20 @@ export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uplo
 
   return (
     <div className="img-attach">
+      {/* Camera input — capture="environment" prevents PWA reload on mobile */}
       <input
         type="file"
         accept="image/*"
-        ref={fileInputRef}
+        capture="environment"
+        ref={cameraInputRef}
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
+      {/* Gallery input — no capture, lets user pick existing photo */}
+      <input
+        type="file"
+        accept="image/*"
+        ref={galleryInputRef}
         onChange={handleFileChange}
         style={{ display: 'none' }}
       />
@@ -55,14 +66,24 @@ export function ImageAttachment({ previewUrl, onSelectImage, onRemoveImage, uplo
           </button>
         </div>
       ) : (
-        <button
-          type="button"
-          className="img-attach-btn"
-          onClick={() => fileInputRef.current?.click()}
-        >
-          <Camera size={18} />
-          <span>Đính kèm hóa đơn</span>
-        </button>
+        <div className="img-attach-actions">
+          <button
+            type="button"
+            className="img-attach-btn"
+            onClick={() => cameraInputRef.current?.click()}
+          >
+            <Camera size={18} />
+            <span>Chụp hóa đơn</span>
+          </button>
+          <button
+            type="button"
+            className="img-attach-btn img-attach-btn--gallery"
+            onClick={() => galleryInputRef.current?.click()}
+          >
+            <ImageIcon size={18} />
+            <span>Chọn từ thư viện</span>
+          </button>
+        </div>
       )}
 
       {/* Lightbox */}

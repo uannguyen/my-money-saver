@@ -1,0 +1,153 @@
+.cam-capture {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.cam-capture-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #000;
+}
+
+.cam-capture-close {
+  position: absolute;
+  top: max(16px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.cam-capture-close:active {
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.cam-capture-controls {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: max(24px, env(safe-area-inset-bottom));
+  padding: 0 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  z-index: 2;
+}
+
+.cam-capture-spacer {
+  width: 44px;
+  height: 44px;
+}
+
+.cam-capture-switch {
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s ease;
+}
+
+.cam-capture-switch:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.cam-capture-switch:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.cam-capture-shutter {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  border: 4px solid #fff;
+  background: transparent;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.cam-capture-shutter:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
+.cam-capture-shutter:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.cam-capture-shutter svg {
+  color: #fff;
+}
+
+.cam-capture-loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  pointer-events: none;
+}
+
+.cam-capture-error {
+  position: relative;
+  z-index: 2;
+  max-width: 320px;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.cam-capture-error p {
+  margin: 0;
+  line-height: 1.5;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.cam-capture-error-btn {
+  padding: 10px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-primary);
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.cam-capture-error-btn:active {
+  opacity: 0.85;
+}

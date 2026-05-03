@@ -6,6 +6,7 @@ import {
   updateSavingsGoal as updateGoalSvc,
   deleteSavingsGoal as deleteGoalSvc,
   depositToGoal as depositSvc,
+  addSavingsMovement as addMovementSvc,
 } from '../services/savingsService'
 
 export function useSavingsGoals() {
@@ -60,9 +61,21 @@ export function useSavingsGoals() {
     return result
   }
 
+  const addMovement = async (goalId, data) => {
+    if (!user) return
+    const result = await addMovementSvc(user.uid, goalId, data)
+    await fetchGoals()
+    return result
+  }
+
   // Computed values
-  const totalSaved = goals.reduce((sum, g) => sum + g.currentAmount, 0)
-  const activeGoals = goals.filter((g) => !g.isCompleted)
+  const activeGoals = goals.filter((g) => !g.isArchived)
+  const totalSaved = activeGoals.reduce((sum, g) => sum + (g.balance || 0), 0)
+  const monthlyContribution = activeGoals.reduce((sum, g) => sum + (g.monthlyContribution || 0), 0)
+  const projected12Months = activeGoals.reduce((sum, g) => {
+    const rateGrowth = (g.balance || 0) * ((g.expectedReturnRate || 0) / 100)
+    return sum + (g.balance || 0) + ((g.monthlyContribution || 0) * 12) + rateGrowth
+  }, 0)
 
   return {
     goals,
@@ -72,7 +85,10 @@ export function useSavingsGoals() {
     updateGoal,
     deleteGoal,
     deposit,
+    addMovement,
     totalSaved,
+    monthlyContribution,
+    projected12Months,
     activeGoals,
     refetch: fetchGoals,
   }

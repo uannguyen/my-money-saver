@@ -4,14 +4,11 @@
   gap: 12px;
 }
 
-.goal-card.goal-completed {
-  border-left: 3px solid #22c55e;
-}
-
 .goal-card-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
 }
 
 .goal-card-left {
@@ -21,7 +18,15 @@
   flex: 1;
 }
 
-.goal-ring {
+.savings-fund-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 1.35rem;
   flex-shrink: 0;
 }
 
@@ -41,55 +46,72 @@
   gap: 6px;
 }
 
-.goal-card-icon {
-  font-size: 1.25rem;
-  flex-shrink: 0;
-}
-
-.goal-check {
-  font-size: 0.875rem;
-}
-
-.goal-card-amounts {
+.savings-fund-meta {
   font-size: 0.8125rem;
   color: var(--color-text-secondary);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
-.goal-card-remaining {
+.savings-fund-meta span + span::before {
+  content: '•';
+  margin-right: 6px;
+  color: var(--color-text-muted);
+}
+
+.savings-fund-balance {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.savings-fund-details {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.savings-fund-details > div {
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.savings-fund-details span {
   font-size: 0.8125rem;
-  font-weight: 600;
-  color: var(--color-primary);
+  color: var(--color-text-muted);
 }
 
-.goal-completed .goal-card-remaining {
-  color: #22c55e;
+.savings-fund-details strong,
+.savings-fund-details .privacy-amount {
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.savings-fund-note {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  line-height: 1.4;
 }
 
 .goal-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-.goal-card-deadline {
-  font-size: 0.8125rem;
-  color: var(--color-text-muted);
-}
-
-.goal-deadline-today {
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-.goal-deadline-passed {
-  color: var(--color-expense);
-  font-weight: 600;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .goal-card-actions {
   display: flex;
   gap: 4px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .goal-deposit-btn {
@@ -99,5 +121,87 @@
 
 .goal-action-btn {
   padding: 4px 8px !important;
+  font-size: 0.875rem;
+}
+
+.savings-history-dialog {
+  width: min(420px, calc(100vw - 32px));
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.savings-history-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-size: 0.875rem;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.savings-history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.savings-history-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-light);
+}
+
+.savings-history-main,
+.savings-history-amount {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.savings-history-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.savings-history-date,
+.savings-history-note,
+.savings-history-amount small {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.savings-history-note {
+  color: var(--color-text-secondary);
+}
+
+.savings-history-amount {
+  align-items: flex-end;
+  flex-shrink: 0;
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+.savings-history-amount .positive {
+  color: var(--color-income);
+}
+
+.savings-history-amount .negative {
+  color: var(--color-expense);
+}
+
+.savings-history-empty {
+  padding: 18px 0;
+  text-align: center;
+  color: var(--color-text-muted);
   font-size: 0.875rem;
 }

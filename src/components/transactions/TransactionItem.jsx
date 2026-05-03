@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { formatVND } from '../../utils/formatCurrency'
 import { getCategoryById } from '../../constants/categories'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
 import './TransactionItem.css'
 
 const REVEAL_THRESHOLD = 60
@@ -121,7 +121,13 @@ export function TransactionItem({ transaction, categories, onEdit, onDelete }) {
         </div>
         <div className="txn-item-right">
           <span className={`txn-item-amount ${isExpense ? 'expense' : 'income'}`}>
-            {isExpense ? '-' : '+'}{formatVND(transaction.amount)}
+            <PrivacyAmount
+              amount={transaction.amount}
+              prefix={isExpense ? '-' : '+'}
+              type={transaction.type}
+              categoryId={transaction.categoryId}
+              sensitive={!isExpense}
+            />
           </span>
           {/* Desktop-only hover delete */}
           <button

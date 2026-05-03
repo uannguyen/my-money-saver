@@ -11,6 +11,7 @@ import { GoalsPage } from './pages/GoalsPage'
 import { SettingsPage } from './pages/SettingsPage'
 import { Toaster } from 'react-hot-toast'
 import toast from 'react-hot-toast'
+import { PrivacyUnlockDialog } from './components/privacy/PrivacyUnlockDialog'
 import { useTransactions } from './hooks/useTransactions'
 import { useBudget } from './hooks/useBudget'
 import { useBudgetAlerts } from './hooks/useBudgetAlerts'
@@ -90,6 +91,7 @@ export default function App() {
           },
         }}
       />
+      <PrivacyUnlockDialog />
 
       <Routes>
         <Route

@@ -4,7 +4,8 @@ import { useCategories } from '../../hooks/useCategories'
 import { getCategoryById } from '../../constants/categories'
 import { CategoryPicker } from './CategoryPicker'
 import { ConfirmDialog } from '../common/ConfirmDialog'
-import { formatVND, parseVND } from '../../utils/formatCurrency'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
+import { parseVND } from '../../utils/formatCurrency'
 import { formatDate } from '../../utils/dateHelpers'
 import { computeNextDueDate } from '../../services/recurringService'
 import toast from 'react-hot-toast'
@@ -137,7 +138,13 @@ export function RecurringManager() {
                   </div>
                   <div className="recurring-card-right">
                     <span className={`recurring-card-amount ${r.type}`}>
-                      {r.type === 'expense' ? '-' : '+'}{formatVND(r.amount)}
+                      <PrivacyAmount
+                        amount={r.amount}
+                        prefix={r.type === 'expense' ? '-' : '+'}
+                        type={r.type}
+                        categoryId={r.categoryId}
+                        sensitive={r.type !== 'expense'}
+                      />
                     </span>
                     <div className="recurring-card-actions">
                       <label className="recurring-toggle">

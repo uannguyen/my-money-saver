@@ -10,6 +10,7 @@ import { TopTransactions } from '../components/charts/TopTransactions'
 import { WeekdayChart } from '../components/charts/WeekdayChart'
 import { MonthlySummaryCard } from '../components/charts/MonthlySummaryCard'
 import { ForecastCard } from '../components/charts/ForecastCard'
+import { PrivacyAmount } from '../components/privacy/PrivacyAmount'
 import { formatVND } from '../utils/formatCurrency'
 import { getMonthKey, prevMonth } from '../utils/dateHelpers'
 import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
@@ -54,12 +55,12 @@ export function StatsPage() {
           <div className="stats-overview card animate-fade-in-up">
             <div className="stats-overview-item">
               <span className="stats-overview-label">Tổng thu</span>
-              <span className="stats-overview-value income">{formatVND(totalIncome)}</span>
+              <PrivacyAmount amount={totalIncome} type="income" className="stats-overview-value income" />
             </div>
             <div className="stats-overview-divider" />
             <div className="stats-overview-item">
               <span className="stats-overview-label">Tổng chi</span>
-              <span className="stats-overview-value expense">{formatVND(totalExpense)}</span>
+              <PrivacyAmount amount={totalExpense} type="expense" sensitive={false} className="stats-overview-value expense" />
             </div>
           </div>
 

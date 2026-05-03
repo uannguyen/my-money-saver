@@ -16,6 +16,13 @@
   color: var(--color-text);
 }
 
+.settings-section-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .settings-account {
   display: flex;
   align-items: center;
@@ -85,6 +92,100 @@
 
 .settings-desc {
   font-size: 0.875rem;
+  color: var(--color-text-secondary);
+}
+
+.settings-switch {
+  width: 48px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-border);
+  padding: 3px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.settings-switch span {
+  width: 22px;
+  height: 22px;
+  display: block;
+  border-radius: var(--radius-full);
+  background: white;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s ease;
+}
+
+.settings-switch.on {
+  background: var(--color-primary);
+}
+
+.settings-switch.on span {
+  transform: translateX(20px);
+}
+
+.settings-pin-action {
+  align-self: flex-start;
+  padding: 10px 14px;
+}
+
+.settings-pin-dialog {
+  width: min(380px, calc(100vw - 32px));
+}
+
+.settings-pin-dialog-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.settings-pin-dialog-input {
+  width: 100%;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-align: center;
+  outline: none;
+}
+
+.settings-pin-dialog-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgb(99 102 241 / 0.1);
+}
+
+.settings-pin-error {
+  color: var(--color-expense);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+
+.settings-sensitive-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-sensitive-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.settings-sensitive-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-size: 0.8125rem;
+  font-weight: 600;
   color: var(--color-text-secondary);
 }
 

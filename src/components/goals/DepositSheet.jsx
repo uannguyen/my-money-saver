@@ -1,29 +1,31 @@
-import { useState, useRef } from 'react'
+import { useState } from 'react'
 import { parseVND } from '../../utils/formatCurrency'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
 import './DepositSheet.css'
 
 const QUICK_AMOUNTS = [
-  { label: '50K', value: 50000 },
-  { label: '100K', value: 100000 },
-  { label: '200K', value: 200000 },
   { label: '500K', value: 500000 },
   { label: '1M', value: 1000000 },
+  { label: '2M', value: 2000000 },
+  { label: '5M', value: 5000000 },
 ]
 
-export function DepositSheet({ goal, onDeposit, onClose }) {
+const TYPE_CONFIG = {
+  deposit: { title: 'Thêm tiền', amountLabel: 'Số tiền thêm', button: 'Thêm tiền' },
+  withdraw: { title: 'Rút tiền', amountLabel: 'Số tiền rút', button: 'Rút tiền' },
+}
+
+export function DepositSheet({ goal, initialType = 'deposit', onMovement, onClose }) {
+  const [type, setType] = useState(initialType)
   const [amountStr, setAmountStr] = useState('')
   const [note, setNote] = useState('')
+  const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
-  const [showConfetti, setShowConfetti] = useState(false)
-  const touchStartY = useRef(null)
+  const config = TYPE_CONFIG[type]
 
   const handleAmountChange = (e) => {
     const raw = e.target.value.replace(/[^\d]/g, '')
-    if (raw === '') {
-      setAmountStr('')
-      return
-    }
-    setAmountStr(Number(raw).toLocaleString('vi-VN'))
+    setAmountStr(raw ? Number(raw).toLocaleString('vi-VN') : '')
   }
 
   const handleQuickAmount = (value) => {
@@ -31,66 +33,62 @@ export function DepositSheet({ goal, onDeposit, onClose }) {
   }
 
   const handleSubmit = async () => {
+    setError('')
     const amount = parseVND(amountStr)
-    if (!amount || amount <= 0) return
+    if (amountStr === '' || amount <= 0) return
+    if (type === 'withdraw' && amount > (goal.balance || 0)) {
+      setError('Số tiền rút không được lớn hơn số dư')
+      return
+    }
 
     setSubmitting(true)
     try {
-      const result = await onDeposit(goal.id, amount, note.trim())
-      if (result?.isCompleted) {
-        setShowConfetti(true)
-        setTimeout(() => {
-          setShowConfetti(false)
-          onClose()
-        }, 3000)
-      } else {
-        onClose()
-      }
+      await onMovement(goal.id, { type, amount, note: note.trim() })
+      onClose()
     } catch (err) {
-      console.error('Deposit failed:', err)
+      console.error('Savings movement failed:', err)
+      setError('Không thể cập nhật khoản tiết kiệm')
     } finally {
       setSubmitting(false)
     }
   }
 
-  const handleTouchStart = (e) => {
-    touchStartY.current = e.touches[0].clientY
-  }
-
-  const handleTouchMove = (e) => {
-    if (touchStartY.current === null) return
-    const delta = e.touches[0].clientY - touchStartY.current
-    if (delta > 80) {
-      touchStartY.current = null
-      onClose()
-    }
-  }
-
-  const handleTouchEnd = () => {
-    touchStartY.current = null
-  }
-
   return (
-    <div className="quick-sheet-overlay" onClick={onClose}>
+    <div className="overlay" onClick={onClose}>
       <div
-        className="quick-sheet animate-slide-up deposit-sheet"
+        className="dialog deposit-dialog"
         onClick={(e) => e.stopPropagation()}
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
       >
-        {/* Handle */}
-        <div className="quick-sheet-handle">
-          <div className="quick-sheet-handle-bar" />
-        </div>
+        <h3 className="dialog-title">{config.title}</h3>
 
-        {/* Goal info */}
         <div className="deposit-goal-info">
-          <span className="deposit-goal-icon">{goal.icon || '🎯'}</span>
+          <span className="deposit-goal-icon">{goal.icon || '🏦'}</span>
           <span className="deposit-goal-name">{goal.name}</span>
         </div>
 
-        {/* Amount input */}
+        <div className="deposit-balance-row">
+          <span>Số dư hiện tại</span>
+          <PrivacyAmount amount={goal.balance || 0} />
+        </div>
+
+        <div className="deposit-type-tabs">
+          {Object.entries(TYPE_CONFIG).map(([key, item]) => (
+            <button
+              key={key}
+              type="button"
+              className={type === key ? 'active' : ''}
+              onClick={() => {
+                setType(key)
+                setAmountStr('')
+                setError('')
+              }}
+            >
+              {item.title}
+            </button>
+          ))}
+        </div>
+
+        <label className="txn-form-label">{config.amountLabel}</label>
         <input
           className="amount-input"
           type="text"
@@ -100,11 +98,7 @@ export function DepositSheet({ goal, onDeposit, onClose }) {
           onChange={handleAmountChange}
           autoFocus
         />
-        <div style={{ textAlign: 'center', fontSize: '0.8125rem', color: 'var(--color-text-muted)', marginBottom: 12 }}>
-          VND
-        </div>
 
-        {/* Quick amount buttons */}
         <div className="deposit-quick-amounts">
           {QUICK_AMOUNTS.map((qa) => (
             <button
@@ -118,7 +112,6 @@ export function DepositSheet({ goal, onDeposit, onClose }) {
           ))}
         </div>
 
-        {/* Note */}
         <input
           className="input"
           type="text"
@@ -128,25 +121,16 @@ export function DepositSheet({ goal, onDeposit, onClose }) {
           style={{ marginTop: 12 }}
         />
 
-        {/* Deposit button */}
+        {error && <div className="deposit-error">{error}</div>}
+
         <button
           className="btn btn-primary"
           style={{ width: '100%', marginTop: 12 }}
           onClick={handleSubmit}
-          disabled={submitting || !parseVND(amountStr)}
+          disabled={submitting || amountStr === '' || !parseVND(amountStr)}
         >
-          {submitting ? 'Đang nạp...' : 'Nạp'}
+          {submitting ? 'Đang lưu...' : config.button}
         </button>
-
-        {/* Confetti */}
-        {showConfetti && (
-          <div className="confetti-container">
-            {Array.from({ length: 20 }).map((_, i) => (
-              <span key={i} className="confetti-piece" />
-            ))}
-            <div className="confetti-message">🎉 Hoàn thành mục tiêu!</div>
-          </div>
-        )}
       </div>
     </div>
   )

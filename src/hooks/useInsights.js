@@ -1,10 +1,14 @@
 import { useMemo } from 'react'
 import { getCategoryById } from '../constants/categories'
 import { formatVND } from '../utils/formatCurrency'
+import { usePrivacy } from '../contexts/privacyContextValue'
 
 const DAY_NAMES = ['Chủ nhật', 'Thứ 2', 'Thứ 3', 'Thứ 4', 'Thứ 5', 'Thứ 6', 'Thứ 7']
 
 export function useInsights(transactions, prevMonthTransactions, budgets, categories) {
+  const { shouldMaskAmount } = usePrivacy()
+  const maskIncome = shouldMaskAmount({ type: 'income' })
+
   const insights = useMemo(() => {
     if (!transactions?.length) return []
 
@@ -132,14 +136,14 @@ export function useInsights(transactions, prevMonthTransactions, budgets, catego
           type: 'forecast',
           icon: '🔮',
           title: 'Dự báo cuối tháng',
-          description: `Dự kiến chi ${formatVND(projected)}${totalIncome > 0 ? `, ${saved >= 0 ? 'tiết kiệm' : 'thiếu'} ${formatVND(Math.abs(saved))}` : ''}`,
+          description: `Dự kiến chi ${formatVND(projected)}${totalIncome > 0 && !maskIncome ? `, ${saved >= 0 ? 'tiết kiệm' : 'thiếu'} ${formatVND(Math.abs(saved))}` : ''}`,
           color: saved >= 0 ? 'var(--color-income)' : 'var(--color-expense)',
         })
       }
     }
 
     return results.slice(0, 4)
-  }, [transactions, prevMonthTransactions, budgets, categories])
+  }, [transactions, prevMonthTransactions, budgets, categories, maskIncome])
 
   return { insights }
 }

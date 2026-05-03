@@ -1,6 +1,6 @@
 import { TransactionItem } from './TransactionItem'
 import { formatDayLabel } from '../../utils/dateHelpers'
-import { formatVND } from '../../utils/formatCurrency'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
 import './TransactionList.css'
 
 export function TransactionList({ dailyGroups, categories, onEdit, onDelete }) {
@@ -16,27 +16,35 @@ export function TransactionList({ dailyGroups, categories, onEdit, onDelete }) {
 
   return (
     <div className="txn-list">
-      {dailyGroups.map((group) => (
-        <div key={group.dateKey} className="txn-day-group animate-fade-in-up">
-          <div className="txn-day-header">
-            <span className="txn-day-label">{formatDayLabel(group.date)}</span>
-            <span className={`txn-day-total ${group.total >= 0 ? 'income' : 'expense'}`}>
-              {group.total >= 0 ? '+' : ''}{formatVND(group.total)}
-            </span>
+      {dailyGroups.map((group) => {
+        const hasIncome = group.transactions.some((txn) => txn.type === 'income')
+
+        return (
+          <div key={group.dateKey} className="txn-day-group animate-fade-in-up">
+            <div className="txn-day-header">
+              <span className="txn-day-label">{formatDayLabel(group.date)}</span>
+              <span className={`txn-day-total ${group.total >= 0 ? 'income' : 'expense'}`}>
+                <PrivacyAmount
+                  amount={group.total}
+                  prefix={group.total >= 0 ? '+' : ''}
+                  sensitive={hasIncome}
+                />
+              </span>
+            </div>
+            <div className="txn-day-items card">
+              {group.transactions.map((txn) => (
+                <TransactionItem
+                  key={txn.id}
+                  transaction={txn}
+                  categories={categories}
+                  onEdit={onEdit}
+                  onDelete={onDelete}
+                />
+              ))}
+            </div>
           </div>
-          <div className="txn-day-items card">
-            {group.transactions.map((txn) => (
-              <TransactionItem
-                key={txn.id}
-                transaction={txn}
-                categories={categories}
-                onEdit={onEdit}
-                onDelete={onDelete}
-              />
-            ))}
-          </div>
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

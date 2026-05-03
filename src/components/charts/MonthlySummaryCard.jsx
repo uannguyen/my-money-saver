@@ -1,4 +1,4 @@
-import { formatVND } from '../../utils/formatCurrency'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
 
 export function MonthlySummaryCard({ totalIncome, totalExpense, budgets }) {
   const balance = totalIncome - totalExpense
@@ -21,28 +21,34 @@ export function MonthlySummaryCard({ totalIncome, totalExpense, budgets }) {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: '0.6875rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Thu nhập</div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>{formatVND(totalIncome)}</div>
+          <PrivacyAmount amount={totalIncome} type="income" style={{ fontSize: '1.125rem', fontWeight: 700 }} />
         </div>
         <div>
           <div style={{ fontSize: '0.6875rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Chi tiêu</div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>{formatVND(totalExpense)}</div>
+          <PrivacyAmount amount={totalExpense} type="expense" sensitive={false} style={{ fontSize: '1.125rem', fontWeight: 700 }} />
         </div>
         <div>
           <div style={{ fontSize: '0.6875rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Tiết kiệm</div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>
-            {formatVND(Math.abs(balance))} {balance >= 0 ? '' : '(thiếu)'}
-          </div>
+          <PrivacyAmount
+            amount={Math.abs(balance)}
+            suffix={balance >= 0 ? '' : ' (thiếu)'}
+            style={{ fontSize: '1.125rem', fontWeight: 700 }}
+          />
         </div>
         <div>
           <div style={{ fontSize: '0.6875rem', opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Tỷ lệ tiết kiệm</div>
-          <div style={{ fontSize: '1.125rem', fontWeight: 700 }}>{savingsRate}%</div>
+          <PrivacyAmount
+            amount={savingsRate}
+            formatter={(value) => `${value}%`}
+            style={{ fontSize: '1.125rem', fontWeight: 700 }}
+          />
         </div>
       </div>
 
       <div style={{ borderTop: '1px solid rgb(255 255 255 / 0.2)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6, fontSize: '0.8125rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.9 }}>
           <span>Dự báo cuối tháng</span>
-          <span style={{ fontWeight: 600 }}>{formatVND(projected)}</span>
+          <PrivacyAmount amount={projected} type="expense" sensitive={false} style={{ fontWeight: 600 }} />
         </div>
         {budgetCount > 0 && (
           <div style={{ display: 'flex', justifyContent: 'space-between', opacity: 0.9 }}>

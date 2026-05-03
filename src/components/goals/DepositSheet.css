@@ -1,6 +1,5 @@
-.deposit-sheet {
-  position: relative;
-  overflow: visible;
+.deposit-dialog {
+  width: min(400px, calc(100vw - 32px));
 }
 
 .deposit-goal-info {
@@ -19,6 +18,46 @@
   font-weight: 600;
   font-size: 1rem;
   color: var(--color-text);
+}
+
+.deposit-balance-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  margin-bottom: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.deposit-balance-row span:first-child {
+  color: var(--color-text-secondary);
+}
+
+.deposit-type-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.deposit-type-tabs button {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text-secondary);
+  padding: 9px 6px;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.deposit-type-tabs button.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgb(99 102 241 / 0.08);
 }
 
 .deposit-quick-amounts {
@@ -47,6 +86,13 @@
 
 .deposit-quick-btn:active {
   transform: scale(0.95);
+}
+
+.deposit-error {
+  margin-top: 10px;
+  color: var(--color-expense);
+  font-size: 0.8125rem;
+  font-weight: 600;
 }
 
 /* Confetti */

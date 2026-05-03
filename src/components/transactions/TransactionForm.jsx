@@ -249,7 +249,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         role="button"
         aria-label="Nhập số tiền"
       >
-        <span className="amount-input" style={{ minWidth: 80, textAlign: 'right' }}>
+        <span className="amount-input">
           {displayAmountStr() || <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>0</span>}
         </span>
         <span className="txn-form-currency">đ</span>

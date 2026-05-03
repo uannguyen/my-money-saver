@@ -14,6 +14,7 @@
   border: 2px solid var(--color-border-light);
   background: var(--color-surface);
   transition: border-color 150ms ease, background 150ms ease;
+  overflow: hidden;
 }
 
 .txn-form-amount-wrapper.is-active {
@@ -21,10 +22,19 @@
   background: #fafaff;
 }
 
+.amount-input {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: right;
+}
+
 .txn-form-currency {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--color-text-muted);
+  flex-shrink: 0;
 }
 
 .txn-form-section {

@@ -1,5 +1,5 @@
 import { parseMonthKey } from '../../utils/dateHelpers'
-import { formatVND } from '../../utils/formatCurrency'
+import { PrivacyAmount } from '../privacy/PrivacyAmount'
 
 export function ForecastCard({ totalIncome, totalExpense, recurrings, monthKey }) {
   const { year, month } = parseMonthKey(monthKey)
@@ -49,7 +49,7 @@ export function ForecastCard({ totalIncome, totalExpense, recurrings, monthKey }
           Dự kiến cuối tháng
         </div>
         <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>
-          {formatVND(projectedBalance)}
+          <PrivacyAmount amount={projectedBalance} />
         </div>
       </div>
 
@@ -57,15 +57,15 @@ export function ForecastCard({ totalIncome, totalExpense, recurrings, monthKey }
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
           <span style={{ color: 'var(--color-text-secondary)' }}>Đã chi</span>
-          <span style={{ fontWeight: 600 }}>{formatVND(actualSpent)}</span>
+          <PrivacyAmount amount={actualSpent} type="expense" sensitive={false} style={{ fontWeight: 600 }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
           <span style={{ color: 'var(--color-text-secondary)' }}>Định kỳ sắp tới</span>
-          <span style={{ fontWeight: 600 }}>{formatVND(upcomingRecurring)}</span>
+          <PrivacyAmount amount={upcomingRecurring} type="expense" sensitive={false} style={{ fontWeight: 600 }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.875rem' }}>
           <span style={{ color: 'var(--color-text-secondary)' }}>Dự kiến chi thêm</span>
-          <span style={{ fontWeight: 600 }}>{formatVND(trendForecast)}</span>
+          <PrivacyAmount amount={trendForecast} type="expense" sensitive={false} style={{ fontWeight: 600 }} />
         </div>
         <div
           style={{
@@ -84,7 +84,7 @@ export function ForecastCard({ totalIncome, totalExpense, recurrings, monthKey }
               color: projectedBalance >= 0 ? 'var(--color-income, #16a34a)' : 'var(--color-expense, #dc2626)',
             }}
           >
-            {formatVND(projectedBalance)}
+            <PrivacyAmount amount={projectedBalance} />
           </span>
         </div>
       </div>

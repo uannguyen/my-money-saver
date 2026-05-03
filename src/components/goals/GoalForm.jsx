@@ -2,55 +2,74 @@ import { useState } from 'react'
 import { parseVND } from '../../utils/formatCurrency'
 import './GoalForm.css'
 
-const PRESET_ICONS = ['🎯', '🏠', '🚗', '✈️', '📱', '💍', '🎓', '🏖️', '💻', '🎮', '👶', '💊']
+const PRESET_ICONS = ['🏦', '💵', '🏠', '🚗', '✈️', '💍', '🎓', '🏖️', '💻', '👶', '🛡️', '📈']
 const PRESET_COLORS = ['#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b', '#22c55e', '#06b6d4', '#ef4444', '#6366f1']
+
+const FUND_TYPES = [
+  { value: 'cash', label: 'Tiền mặt' },
+  { value: 'bank', label: 'Ngân hàng' },
+  { value: 'emergency', label: 'Khẩn cấp' },
+  { value: 'investment', label: 'Đầu tư' },
+  { value: 'sinking', label: 'Quỹ định kỳ' },
+  { value: 'other', label: 'Khác' },
+]
+
+function formatInputAmount(value) {
+  if (!value) return ''
+  return Number(value).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+}
+
+function formatDateInput(value) {
+  if (!value) return ''
+  const date = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(date.getTime())) return ''
+  return date.toISOString().split('T')[0]
+}
 
 export function GoalForm({ initial, onSave, onClose }) {
   const [name, setName] = useState(initial?.name || '')
-  const [targetAmount, setTargetAmount] = useState(
-    initial?.targetAmount
-      ? initial.targetAmount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-      : ''
+  const [fundType, setFundType] = useState(initial?.fundType || 'bank')
+  const [balance, setBalance] = useState(formatInputAmount(initial?.balance))
+  const [monthlyContribution, setMonthlyContribution] = useState(
+    formatInputAmount(initial?.monthlyContribution)
   )
-  const [icon, setIcon] = useState(initial?.icon || '🎯')
+  const [expectedReturnRate, setExpectedReturnRate] = useState(
+    initial?.expectedReturnRate ? String(initial.expectedReturnRate) : ''
+  )
+  const [maturityDate, setMaturityDate] = useState(formatDateInput(initial?.maturityDate))
+  const [note, setNote] = useState(initial?.note || '')
+  const [icon, setIcon] = useState(initial?.icon || '🏦')
   const [color, setColor] = useState(initial?.color || '#3b82f6')
-  const [deadline, setDeadline] = useState(
-    initial?.deadline
-      ? (initial.deadline instanceof Date
-          ? initial.deadline.toISOString().split('T')[0]
-          : new Date(initial.deadline).toISOString().split('T')[0])
-      : ''
-  )
   const [submitting, setSubmitting] = useState(false)
 
-  const handleAmountChange = (e) => {
+  const handleMoneyChange = (setter) => (e) => {
     const raw = e.target.value.replace(/[^\d]/g, '')
-    if (!raw) {
-      setTargetAmount('')
-      return
-    }
-    setTargetAmount(
-      parseInt(raw).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-    )
+    setter(raw ? formatInputAmount(raw) : '')
+  }
+
+  const handleRateChange = (e) => {
+    setExpectedReturnRate(e.target.value.replace(/[^\d.]/g, '').slice(0, 5))
   }
 
   const handleSubmit = async () => {
     if (!name.trim()) return
-    const amount = parseVND(targetAmount)
-    if (!amount || amount <= 0) return
 
     setSubmitting(true)
     try {
       await onSave({
         name: name.trim(),
-        targetAmount: amount,
+        fundType,
+        balance: initial ? undefined : (parseVND(balance) || 0),
+        monthlyContribution: parseVND(monthlyContribution) || 0,
+        expectedReturnRate: Number(expectedReturnRate) || 0,
+        maturityDate: maturityDate || null,
+        note: note.trim(),
         icon,
         color,
-        deadline: deadline || null,
       })
       onClose()
     } catch (err) {
-      console.error('Failed to save goal:', err)
+      console.error('Failed to save savings fund:', err)
     } finally {
       setSubmitting(false)
     }
@@ -60,35 +79,75 @@ export function GoalForm({ initial, onSave, onClose }) {
     <div className="overlay" onClick={onClose}>
       <div className="dialog goal-form-dialog" onClick={(e) => e.stopPropagation()}>
         <h3 className="dialog-title">
-          {initial ? 'Sửa mục tiêu' : 'Thêm mục tiêu'}
+          {initial ? 'Sửa khoản tiết kiệm' : 'Thêm khoản tiết kiệm'}
         </h3>
 
         <div className="goal-form">
-          <label className="txn-form-label">Tên mục tiêu</label>
+          <label className="txn-form-label">Tên khoản tiết kiệm</label>
           <input
             type="text"
             className="input"
-            placeholder="Ví dụ: Mua xe máy"
+            placeholder="Ví dụ: Quỹ khẩn cấp"
             value={name}
             onChange={(e) => setName(e.target.value)}
             autoFocus
           />
 
-          <label className="txn-form-label" style={{ marginTop: 12 }}>
-            Số tiền mục tiêu (VND)
-          </label>
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Loại khoản</label>
+          <select className="input" value={fundType} onChange={(e) => setFundType(e.target.value)}>
+            {FUND_TYPES.map((type) => (
+              <option key={type.value} value={type.value}>{type.label}</option>
+            ))}
+          </select>
+
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Số dư hiện tại</label>
           <input
             type="text"
             inputMode="numeric"
             className="input"
-            placeholder="10.000.000"
-            value={targetAmount}
-            onChange={handleAmountChange}
+            placeholder="0"
+            value={balance}
+            onChange={handleMoneyChange(setBalance)}
           />
 
-          <label className="txn-form-label" style={{ marginTop: 12 }}>
-            Biểu tượng
-          </label>
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Dự kiến góp mỗi tháng</label>
+          <input
+            type="text"
+            inputMode="numeric"
+            className="input"
+            placeholder="0"
+            value={monthlyContribution}
+            onChange={handleMoneyChange(setMonthlyContribution)}
+          />
+
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Lãi suất kỳ vọng / năm (%)</label>
+          <input
+            type="text"
+            inputMode="decimal"
+            className="input"
+            placeholder="0"
+            value={expectedReturnRate}
+            onChange={handleRateChange}
+          />
+
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Ngày đáo hạn (tùy chọn)</label>
+          <input
+            type="date"
+            className="input"
+            value={maturityDate}
+            onChange={(e) => setMaturityDate(e.target.value)}
+          />
+
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Ghi chú</label>
+          <input
+            type="text"
+            className="input"
+            placeholder="Nơi giữ tiền, kỳ hạn, mục đích..."
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+          />
+
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Biểu tượng</label>
           <div className="goal-form-icons">
             {PRESET_ICONS.map((e) => (
               <button
@@ -102,9 +161,7 @@ export function GoalForm({ initial, onSave, onClose }) {
             ))}
           </div>
 
-          <label className="txn-form-label" style={{ marginTop: 12 }}>
-            Màu sắc
-          </label>
+          <label className="txn-form-label" style={{ marginTop: 12 }}>Màu sắc</label>
           <div className="goal-form-colors">
             {PRESET_COLORS.map((c) => (
               <button
@@ -116,26 +173,14 @@ export function GoalForm({ initial, onSave, onClose }) {
               />
             ))}
           </div>
-
-          <label className="txn-form-label" style={{ marginTop: 12 }}>
-            Hạn chót (tùy chọn)
-          </label>
-          <input
-            type="date"
-            className="input"
-            value={deadline}
-            onChange={(e) => setDeadline(e.target.value)}
-          />
         </div>
 
         <div className="dialog-actions" style={{ marginTop: 20 }}>
-          <button className="btn btn-ghost" onClick={onClose}>
-            Hủy
-          </button>
+          <button className="btn btn-ghost" onClick={onClose}>Hủy</button>
           <button
             className="btn btn-primary"
             onClick={handleSubmit}
-            disabled={submitting || !name.trim() || !parseVND(targetAmount)}
+            disabled={submitting || !name.trim()}
           >
             {submitting ? 'Đang lưu...' : 'Lưu'}
           </button>

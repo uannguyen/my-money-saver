@@ -8,22 +8,20 @@ import { Header } from '../components/layout/Header'
 import { TransactionList } from '../components/transactions/TransactionList'
 import { InsightCard } from '../components/common/InsightCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
-import { formatVND } from '../utils/formatCurrency'
+import { PrivacyAmount } from '../components/privacy/PrivacyAmount'
 import { getMonthKey, prevMonth, formatDate } from '../utils/dateHelpers'
 import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
 
-import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import './HomePage.css'
 
 export function HomePage() {
-  const { user } = useAuth()
   const [monthKey, setMonthKey] = useState(getMonthKey(new Date()))
   const {
     transactions, loading, dailyGroups,
     totalIncome, totalExpense, balance,
-    deleteTransaction, expenseByCategory, refetch,
+    deleteTransaction, expenseByCategory,
   } = useTransactions(monthKey)
   const { transactions: prevTransactions } = useTransactions(prevMonth(monthKey))
   const { budgets } = useBudget(monthKey, expenseByCategory)
@@ -59,15 +57,15 @@ export function HomePage() {
       <div className="summary-cards animate-fade-in-up">
         <div className="summary-card income">
           <span className="summary-label">Thu nhập</span>
-          <span className="summary-amount">{formatVND(totalIncome)}</span>
+          <PrivacyAmount amount={totalIncome} type="income" className="summary-amount" />
         </div>
         <div className="summary-card expense">
           <span className="summary-label">Chi tiêu</span>
-          <span className="summary-amount">{formatVND(totalExpense)}</span>
+          <PrivacyAmount amount={totalExpense} type="expense" sensitive={false} className="summary-amount" />
         </div>
         <div className={`summary-card balance ${balance >= 0 ? 'positive' : 'negative'}`}>
           <span className="summary-label">Số dư</span>
-          <span className="summary-amount">{formatVND(balance)}</span>
+          <PrivacyAmount amount={balance} className="summary-amount" />
         </div>
       </div>
 
@@ -86,7 +84,13 @@ export function HomePage() {
                 <span style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
                   <span style={{ color: 'var(--color-text-muted)' }}>{formatDate(r.nextDueDate)}</span>
                   <span style={{ fontWeight: 600, color: r.type === 'expense' ? 'var(--color-expense)' : 'var(--color-income)' }}>
-                    {r.type === 'expense' ? '-' : '+'}{formatVND(r.amount)}
+                    <PrivacyAmount
+                      amount={r.amount}
+                      prefix={r.type === 'expense' ? '-' : '+'}
+                      type={r.type}
+                      categoryId={r.categoryId}
+                      sensitive={r.type !== 'expense'}
+                    />
                   </span>
                 </span>
               </div>

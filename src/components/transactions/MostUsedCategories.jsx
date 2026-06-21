@@ -1,7 +1,6 @@
-import { useState } from 'react'
-import { ChevronUp, ChevronDown, Pencil } from 'lucide-react'
-import { getCategoryById } from '../../constants/categories'
-import './MostUsedCategories.css'
+import { ChevronDown, ChevronUp, Pencil } from "lucide-react";
+import { useState } from "react";
+import "./MostUsedCategories.css";
 
 /**
  * Collapsible "Most used" grid — 2 rows × 4 cols (7 items + Edit button).
@@ -11,12 +10,16 @@ import './MostUsedCategories.css'
  *   selectedCategoryId - currently selected categoryId
  *   onSelect(id)       - callback when a category is tapped
  *   onEdit()           - callback when "Edit" button is tapped
- *   categories         - flat category list for lookup
  */
-export function MostUsedCategories({ mostUsed, selectedCategoryId, onSelect, onEdit, categories }) {
-  const [expanded, setExpanded] = useState(false)
+export function MostUsedCategories({
+  mostUsed,
+  selectedCategoryId,
+  onSelect,
+  onEdit
+}) {
+  const [expanded, setExpanded] = useState(true);
 
-  if (!mostUsed?.length) return null
+  if (!mostUsed?.length) return null;
 
   return (
     <div className="most-used-wrapper">
@@ -34,18 +37,18 @@ export function MostUsedCategories({ mostUsed, selectedCategoryId, onSelect, onE
       {expanded && (
         <div className="most-used-grid">
           {mostUsed.slice(0, 7).map((cat) => {
-            const isSelected = cat.id === selectedCategoryId
+            const isSelected = cat.id === selectedCategoryId;
             return (
               <button
                 key={cat.id}
                 type="button"
-                className={`most-used-item ${isSelected ? 'selected' : ''}`}
+                className={`most-used-item ${isSelected ? "selected" : ""}`}
                 onClick={() => onSelect(cat.id)}
               >
                 <span className="most-used-item-icon">{cat.icon}</span>
                 <span className="most-used-item-name">{cat.name}</span>
               </button>
-            )
+            );
           })}
 
           {/* Edit button */}
@@ -62,5 +65,5 @@ export function MostUsedCategories({ mostUsed, selectedCategoryId, onSelect, onE
         </div>
       )}
     </div>
-  )
+  );
 }

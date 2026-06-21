@@ -4,11 +4,9 @@ import { BudgetCard } from "../components/budget/BudgetCard";
 import { ConfirmDialog } from "../components/common/ConfirmDialog";
 import { Header } from "../components/layout/Header";
 import { CategoryPicker } from "../components/transactions/CategoryPicker";
-import {
-  ALL_DEFAULT_CATEGORIES,
-  getCategoryById
-} from "../constants/categories";
+import { getCategoryById } from "../constants/categories";
 import { useBudget } from "../hooks/useBudget";
+import { useCategories } from "../hooks/useCategories";
 import { useTransactions } from "../hooks/useTransactions";
 import { getMonthKey } from "../utils/dateHelpers";
 import { parseVND } from "../utils/formatCurrency";
@@ -16,10 +14,12 @@ import "./BudgetPage.css";
 
 export function BudgetPage() {
   const [monthKey, setMonthKey] = useState(getMonthKey(new Date()));
+  const { parents, categories } = useCategories();
   const { expenseByCategory } = useTransactions(monthKey);
   const { budgets, loading, addBudget, updateBudget, deleteBudget } = useBudget(
     monthKey,
-    expenseByCategory
+    expenseByCategory,
+    parents
   );
 
   const [showForm, setShowForm] = useState(false);
@@ -69,7 +69,7 @@ export function BudgetPage() {
         toast.success("Đã thêm ngân sách");
       }
       setShowForm(false);
-    } catch (err) {
+    } catch {
       toast.error("Lưu thất bại");
     }
   };
@@ -86,7 +86,7 @@ export function BudgetPage() {
   };
 
   const selectedCategory = formCategoryId
-    ? getCategoryById(ALL_DEFAULT_CATEGORIES, formCategoryId)
+    ? getCategoryById(categories, formCategoryId)
     : null;
 
   return (
@@ -113,7 +113,7 @@ export function BudgetPage() {
                 <BudgetCard
                   key={b.id}
                   budget={b}
-                  categories={ALL_DEFAULT_CATEGORIES}
+                  categories={categories}
                   onEdit={openEdit}
                   onDelete={setDeleteTarget}
                 />

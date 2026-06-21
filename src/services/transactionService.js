@@ -111,6 +111,22 @@ export async function getTransactionsByMonth(userId, monthKey) {
 }
 
 /**
+ * Get all transactions for export
+ */
+export async function getAllTransactions(userId) {
+  const ref = getTransactionsRef(userId)
+  const q = query(ref, orderBy('date', 'desc'))
+
+  const snapshot = await getDocs(q)
+  return snapshot.docs.map((doc) => ({
+    id: doc.id,
+    ...doc.data(),
+    date: doc.data().date.toDate(),
+    createdAt: doc.data().createdAt?.toDate(),
+  }))
+}
+
+/**
  * Get transactions within a date range
  */
 export async function getTransactionsByRange(userId, startDate, endDate) {

@@ -1,19 +1,19 @@
 import { useAuth } from '../contexts/AuthContext'
 import { usePrivacy } from '../contexts/privacyContextValue'
-import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { Header } from '../components/layout/Header'
 import { CategoryManager } from '../components/categories/CategoryManager'
 import { RecurringManager } from '../components/transactions/RecurringManager'
 import { logOut } from '../services/authService'
+import { getAllTransactions, getTransactionsByRange } from '../services/transactionService'
 import { exportToExcel } from '../utils/exportExcel'
-import { ALL_DEFAULT_CATEGORIES } from '../constants/categories'
-import { getMonthKey } from '../utils/dateHelpers'
+import { resolveExportRequest } from '../utils/exportRange'
 import { useEffect, useState } from 'react'
 import toast from 'react-hot-toast'
+import { Download } from 'lucide-react'
 import './SettingsPage.css'
 
-function PrivacySettingsSection() {
+function PrivacySettingsSection({ categories = [] }) {
   const {
     settings,
     loading,
@@ -23,7 +23,6 @@ function PrivacySettingsSection() {
     changePin,
     updatePrivacySettings,
   } = usePrivacy()
-  const { categories } = useCategories()
   const [pinDialogOpen, setPinDialogOpen] = useState(false)
   const [currentPin, setCurrentPin] = useState('')
   const [newPin, setNewPin] = useState('')
@@ -219,25 +218,62 @@ function PrivacySettingsSection() {
 export function SettingsPage() {
   const { user } = useAuth()
   const { privacyEnabled, isUnlocked, requestUnlock } = usePrivacy()
-  const [monthKey] = useState(getMonthKey(new Date()))
-  const { transactions } = useTransactions(monthKey)
+  const { categories, loading: categoriesLoading } = useCategories()
+  const [exportMode, setExportMode] = useState('all')
+  const [exportStartDate, setExportStartDate] = useState('')
+  const [exportEndDate, setExportEndDate] = useState('')
+  const [exporting, setExporting] = useState(false)
 
-  const handleExport = () => {
+  const selectExportMode = (mode) => {
+    setExportMode(mode)
+    if (mode === 'all') {
+      setExportStartDate('')
+      setExportEndDate('')
+    }
+  }
+
+  const handleExport = async () => {
     if (privacyEnabled && !isUnlocked) {
       requestUnlock()
       toast.error('Mở khóa trước khi xuất dữ liệu')
       return
     }
 
-    if (transactions.length === 0) {
-      toast.error('Không có dữ liệu để xuất')
+    if (!user?.uid) {
+      toast.error('Không thể xác định tài khoản')
       return
     }
+
+    let exportRequest
     try {
-      exportToExcel(transactions, ALL_DEFAULT_CATEGORIES, `chi-tieu-${monthKey}`)
-      toast.success('Đã xuất file Excel')
-    } catch {
+      exportRequest = resolveExportRequest({
+        mode: exportMode,
+        startDate: exportStartDate,
+        endDate: exportEndDate,
+      })
+    } catch (error) {
+      toast.error(error.message)
+      return
+    }
+
+    setExporting(true)
+    try {
+      const data = exportRequest.mode === 'all'
+        ? await getAllTransactions(user.uid)
+        : await getTransactionsByRange(user.uid, exportRequest.startDate, exportRequest.endDate)
+
+      if (data.length === 0) {
+        toast.error('Không có dữ liệu để xuất')
+        return
+      }
+
+      exportToExcel(data, categories, exportRequest.filename)
+      toast.success(exportRequest.mode === 'all' ? 'Đã xuất tất cả dữ liệu' : 'Đã xuất dữ liệu theo khoảng thời gian')
+    } catch (error) {
+      console.error('Export failed:', error)
       toast.error('Xuất file thất bại')
+    } finally {
+      setExporting(false)
     }
   }
 
@@ -276,7 +312,7 @@ export function SettingsPage() {
           </div>
         </div>
 
-        <PrivacySettingsSection />
+        <PrivacySettingsSection categories={categories} />
 
         {/* Category Manager */}
         <div className="card settings-section animate-fade-in-up">
@@ -293,9 +329,57 @@ export function SettingsPage() {
         {/* Export */}
         <div className="card settings-section animate-fade-in-up">
           <h3 className="settings-section-title">Xuất dữ liệu</h3>
-          <p className="settings-desc">Xuất giao dịch tháng hiện tại ra file Excel</p>
-          <button className="btn btn-outline" onClick={handleExport}>
-            📥 Xuất Excel
+          <p className="settings-desc">Xuất giao dịch ra file Excel theo toàn bộ dữ liệu hoặc khoảng thời gian đã chọn.</p>
+
+          <div className="settings-export-mode" role="group" aria-label="Phạm vi xuất dữ liệu">
+            <button
+              type="button"
+              className={`settings-export-mode-btn ${exportMode === 'all' ? 'active' : ''}`}
+              onClick={() => selectExportMode('all')}
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              className={`settings-export-mode-btn ${exportMode === 'range' ? 'active' : ''}`}
+              onClick={() => selectExportMode('range')}
+            >
+              Khoảng thời gian
+            </button>
+          </div>
+
+          {exportMode === 'range' && (
+            <div className="settings-export-range">
+              <label className="settings-export-field">
+                <span>Từ ngày</span>
+                <input
+                  className="input"
+                  type="date"
+                  value={exportStartDate}
+                  max={exportEndDate || undefined}
+                  onChange={(e) => setExportStartDate(e.target.value)}
+                />
+              </label>
+              <label className="settings-export-field">
+                <span>Đến ngày</span>
+                <input
+                  className="input"
+                  type="date"
+                  value={exportEndDate}
+                  min={exportStartDate || undefined}
+                  onChange={(e) => setExportEndDate(e.target.value)}
+                />
+              </label>
+            </div>
+          )}
+
+          <button
+            className="btn btn-outline settings-export-submit"
+            onClick={handleExport}
+            disabled={exporting || categoriesLoading}
+          >
+            <Download size={16} aria-hidden="true" />
+            {exporting ? 'Đang xuất...' : 'Xuất Excel'}
           </button>
         </div>
 

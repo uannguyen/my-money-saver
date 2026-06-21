@@ -15,9 +15,9 @@ import { PrivacyUnlockDialog } from './components/privacy/PrivacyUnlockDialog'
 import { useTransactions } from './hooks/useTransactions'
 import { useBudget } from './hooks/useBudget'
 import { useBudgetAlerts } from './hooks/useBudgetAlerts'
+import { useCategories } from './hooks/useCategories'
 import { useRecurring } from './hooks/useRecurring'
 import { getMonthKey } from './utils/dateHelpers'
-import { ALL_DEFAULT_CATEGORIES } from './constants/categories'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -39,9 +39,10 @@ function ProtectedRoute({ children }) {
 
 function AppLayout({ children, hideNav }) {
   const currentMonthKey = getMonthKey(new Date())
+  const { parents, categories } = useCategories()
   const { expenseByCategory } = useTransactions(currentMonthKey)
-  const { budgets } = useBudget(currentMonthKey, expenseByCategory)
-  const { alertCount } = useBudgetAlerts(budgets, ALL_DEFAULT_CATEGORIES)
+  const { budgets } = useBudget(currentMonthKey, expenseByCategory, parents)
+  const { alertCount } = useBudgetAlerts(budgets, categories)
 
   return (
     <>

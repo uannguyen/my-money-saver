@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
-import { SUB_IDS_BY_PARENT } from '../constants/categories'
+import { ALL_DEFAULT_PARENTS } from '../constants/categories'
+import { getBudgetsWithSpent } from '../utils/budgetCalculations'
 import {
   getBudgetsByMonth,
   addBudget as addBdg,
@@ -8,7 +9,7 @@ import {
   deleteBudget as deleteBdg,
 } from '../services/budgetService'
 
-export function useBudget(monthKey, expenseByCategory = {}) {
+export function useBudget(monthKey, expenseByCategory = {}, parents = ALL_DEFAULT_PARENTS) {
   const { user } = useAuth()
   const [budgets, setBudgets] = useState([])
   const [loading, setLoading] = useState(true)
@@ -53,20 +54,10 @@ export function useBudget(monthKey, expenseByCategory = {}) {
     await fetchBudgets()
   }
 
-  // Enrich budgets with spent from expenseByCategory
-  // If budget targets a parent category, aggregate all sub-category spending
-  const budgetsWithSpent = budgets.map((b) => {
-    const subIds = SUB_IDS_BY_PARENT.get(b.categoryId)
-    const spent = subIds
-      ? subIds.reduce((sum, sid) => sum + (expenseByCategory[sid] || 0), 0)
-      : (expenseByCategory[b.categoryId] || 0)
-    return {
-      ...b,
-      spent,
-      remaining: b.amount - spent,
-      percentage: b.amount > 0 ? Math.round((spent / b.amount) * 100) : 0,
-    }
-  })
+  const budgetsWithSpent = useMemo(
+    () => getBudgetsWithSpent(budgets, expenseByCategory, parents),
+    [budgets, expenseByCategory, parents]
+  )
 
   return {
     budgets: budgetsWithSpent,

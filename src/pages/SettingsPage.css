@@ -189,6 +189,66 @@
   color: var(--color-text-secondary);
 }
 
+.settings-export-mode {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+}
+
+.settings-export-mode-btn {
+  border: none;
+  border-radius: calc(var(--radius-md) - 4px);
+  background: transparent;
+  color: var(--color-text-secondary);
+  padding: 9px 10px;
+  font-family: inherit;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.settings-export-mode-btn.active {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.settings-export-range {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.settings-export-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.settings-export-field span {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--color-text-muted);
+}
+
+.settings-export-field .input {
+  padding: 11px 12px;
+  font-size: 0.875rem;
+}
+
+.settings-export-submit {
+  width: 100%;
+}
+
+.settings-export-submit:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .settings-logout {
   width: 100%;
   margin-top: 8px;
@@ -199,4 +259,10 @@
   font-size: 0.75rem;
   color: var(--color-text-muted);
   padding: 8px 0;
+}
+
+@media (max-width: 420px) {
+  .settings-export-range {
+    grid-template-columns: 1fr;
+  }
 }

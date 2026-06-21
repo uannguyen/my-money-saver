@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getTodayDateTimeString } from '../../utils/dateHelpers'
-import { formatVND, parseVND } from '../../utils/formatCurrency'
+import { parseVND } from '../../utils/formatCurrency'
 import { useCategories } from '../../hooks/useCategories'
 import { useRecentTransactions } from '../../hooks/useRecentTransactions'
 import { useCategorySuggestion } from '../../hooks/useCategorySuggestion'
@@ -50,7 +50,7 @@ function saveLastDateTime(dt) {
   sessionStorage.setItem(STORAGE_KEY, dt)
 }
 
-export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit, onCancel }) {
+export function TransactionForm({ initial, onSubmit, onCancel }) {
   const { parents, categories: allCats } = useCategories()
   const [type, setType] = useState(initial?.type || 'expense')
   const [showCategoryPicker, setShowCategoryPicker] = useState(false)
@@ -78,9 +78,11 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     initialImageUrl,
     selectImage,
     removeImage,
-    uploadImage,
   } = useImageUpload(initial?.imageUrl)
+  const initialCategoryId = initial?.categoryId || ''
   const userHasManuallySelected = useRef(false)
+  const autoSelectedCategoryId = useRef(initialCategoryId)
+  const amountDisplayRef = useRef(null)
 
   // Category suggestion
   const { transactions: recentTransactions } = useRecentTransactions(30)
@@ -107,34 +109,32 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
     if (selectedCat && selectedCat.type !== type) {
       setCategoryId('')
       userHasManuallySelected.current = false
+      autoSelectedCategoryId.current = ''
     }
-  }, [type])
+  }, [selectedCat, type])
 
-  // Auto-select top suggestion when amount changes
+  // Auto-select only when the suggestion is strong and the user has not chosen a category.
   useEffect(() => {
-    if (
-      suggestions.length > 0 &&
-      !userHasManuallySelected.current &&
-      !initial?.categoryId
-    ) {
-      setCategoryId(suggestions[0].categoryId)
+    const topSuggestion = suggestions[0]
+    if (!topSuggestion?.autoSelect || userHasManuallySelected.current || initialCategoryId) {
+      return
     }
-  }, [suggestions])
+    if (categoryId && categoryId !== autoSelectedCategoryId.current) {
+      return
+    }
+    setCategoryId(topSuggestion.categoryId)
+    autoSelectedCategoryId.current = topSuggestion.categoryId
+  }, [suggestions, categoryId, initialCategoryId])
+
+  useEffect(() => {
+    const node = amountDisplayRef.current
+    if (node) node.scrollLeft = node.scrollWidth
+  }, [amountStr])
 
   // Clear category error when a category is selected
   useEffect(() => {
     if (categoryId) setCategoryError('')
   }, [categoryId])
-
-  const handleAmountChange = (e) => {
-    const raw = e.target.value.replace(/[^\d]/g, '')
-    if (raw === '') {
-      setAmountStr('')
-      return
-    }
-    const num = parseInt(raw, 10)
-    setAmountStr(num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'))
-  }
 
   // Get numeric value from expression or plain string
   const getAmountValue = () => {
@@ -220,6 +220,12 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
   const dateObj = new Date(date)
   const displayDate = `${String(dateObj.getDate()).padStart(2, '0')}/${String(dateObj.getMonth() + 1).padStart(2, '0')}/${dateObj.getFullYear()}`
   const displayTime = `${String(dateObj.getHours()).padStart(2, '0')}:${String(dateObj.getMinutes()).padStart(2, '0')}`
+  const amountDisplay = displayAmountStr()
+  const amountDisplaySizeClass = amountDisplay.length > 24
+    ? ' is-compact'
+    : amountDisplay.length > 16
+      ? ' is-long'
+      : ''
 
   return (
     <form className="txn-form" onSubmit={handleSubmit}>
@@ -249,8 +255,12 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
         role="button"
         aria-label="Nhập số tiền"
       >
-        <span className="amount-input">
-          {displayAmountStr() || <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>0</span>}
+        <span
+          ref={amountDisplayRef}
+          className={`amount-input txn-amount-display${amountDisplaySizeClass}`}
+          title={amountDisplay || '0'}
+        >
+          {amountDisplay || <span style={{ color: 'var(--color-text-muted)', fontWeight: 400 }}>0</span>}
         </span>
         <span className="txn-form-currency">đ</span>
       </div>
@@ -271,6 +281,7 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           selectedCategoryId={categoryId}
           onSelect={(id) => {
             userHasManuallySelected.current = true
+            autoSelectedCategoryId.current = ''
             setCategoryId(id)
             setCategoryError('')
           }}
@@ -330,6 +341,8 @@ export function TransactionForm({ initial, categories, onCategoryAdded, onSubmit
           type={type}
           selectedId={categoryId}
           onSelect={(sub) => {
+            userHasManuallySelected.current = true
+            autoSelectedCategoryId.current = ''
             setCategoryId(sub.id)
             setShowCategoryPicker(false)
           }}

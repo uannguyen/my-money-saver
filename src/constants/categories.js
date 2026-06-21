@@ -161,9 +161,8 @@ export const ALL_DEFAULT_CATEGORIES = ALL_DEFAULT_PARENTS.flatMap((parent) => {
 export const DEFAULT_PARENT_IDS = new Set(ALL_DEFAULT_PARENTS.map((p) => p.id))
 export const DEFAULT_SUB_IDS = new Set(ALL_DEFAULT_CATEGORIES.map((s) => s.id))
 
-// Maps each parent category ID to its children's sub-category IDs.
-// Used by useBudget to aggregate sub-category spending when a budget
-// targets a parent (e.g., 'food' budget sums eat_company + eat_snack + ...).
+// Static default parent -> sub-category map. Runtime budget calculations use
+// the merged category tree so custom parent/sub categories are included too.
 export const SUB_IDS_BY_PARENT = new Map(
   ALL_DEFAULT_PARENTS.map((p) => [p.id, p.subs.map((s) => s.id)])
 )

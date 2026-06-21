@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useBudget } from '../hooks/useBudget'
+import { useCategories } from '../hooks/useCategories'
 import { useRecurring } from '../hooks/useRecurring'
 import { Header } from '../components/layout/Header'
 import { MonthlyBarChart } from '../components/charts/MonthlyBarChart'
@@ -13,15 +14,16 @@ import { ForecastCard } from '../components/charts/ForecastCard'
 import { PrivacyAmount } from '../components/privacy/PrivacyAmount'
 import { formatVND } from '../utils/formatCurrency'
 import { getMonthKey, prevMonth } from '../utils/dateHelpers'
-import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
+import { getCategoryById } from '../constants/categories'
 import './StatsPage.css'
 
 export function StatsPage() {
   const [monthKey, setMonthKey] = useState(getMonthKey(new Date()))
+  const { parents, categories } = useCategories()
   const { transactions, loading, expenseByCategory, totalIncome, totalExpense } =
     useTransactions(monthKey)
   const { transactions: prevTransactions } = useTransactions(prevMonth(monthKey))
-  const { budgets } = useBudget(monthKey, expenseByCategory)
+  const { budgets } = useBudget(monthKey, expenseByCategory, parents)
   const { recurrings } = useRecurring()
 
   // Top expense categories
@@ -29,7 +31,7 @@ export function StatsPage() {
     .sort(([, a], [, b]) => b - a)
     .slice(0, 5)
     .map(([catId, amount]) => ({
-      ...getCategoryById(ALL_DEFAULT_CATEGORIES, catId),
+      ...getCategoryById(categories, catId),
       amount,
     }))
 
@@ -70,7 +72,7 @@ export function StatsPage() {
           {/* Pie Chart */}
           <CategoryPieChart
             expenseByCategory={expenseByCategory}
-            categories={ALL_DEFAULT_CATEGORIES}
+            categories={categories}
           />
 
           {/* Top Categories */}
@@ -96,11 +98,11 @@ export function StatsPage() {
           <MonthComparisonCard
             currentTransactions={transactions}
             prevTransactions={prevTransactions}
-            categories={ALL_DEFAULT_CATEGORIES}
+            categories={categories}
           />
 
           {/* Top 5 Transactions */}
-          <TopTransactions transactions={transactions} categories={ALL_DEFAULT_CATEGORIES} />
+          <TopTransactions transactions={transactions} categories={categories} />
 
           {/* Weekday Chart */}
           <WeekdayChart transactions={transactions} />

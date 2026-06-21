@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useTransactions } from '../hooks/useTransactions'
 import { useBudget } from '../hooks/useBudget'
 import { useBudgetAlerts } from '../hooks/useBudgetAlerts'
+import { useCategories } from '../hooks/useCategories'
 import { useInsights } from '../hooks/useInsights'
 import { useRecurring } from '../hooks/useRecurring'
 import { Header } from '../components/layout/Header'
@@ -10,7 +11,7 @@ import { InsightCard } from '../components/common/InsightCard'
 import { ConfirmDialog } from '../components/common/ConfirmDialog'
 import { PrivacyAmount } from '../components/privacy/PrivacyAmount'
 import { getMonthKey, prevMonth, formatDate } from '../utils/dateHelpers'
-import { ALL_DEFAULT_CATEGORIES, getCategoryById } from '../constants/categories'
+import { getCategoryById } from '../constants/categories'
 
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
@@ -18,15 +19,16 @@ import './HomePage.css'
 
 export function HomePage() {
   const [monthKey, setMonthKey] = useState(getMonthKey(new Date()))
+  const { parents, categories } = useCategories()
   const {
     transactions, loading, dailyGroups,
     totalIncome, totalExpense, balance,
     deleteTransaction, expenseByCategory,
   } = useTransactions(monthKey)
   const { transactions: prevTransactions } = useTransactions(prevMonth(monthKey))
-  const { budgets } = useBudget(monthKey, expenseByCategory)
-  const { showDailyToast } = useBudgetAlerts(budgets, ALL_DEFAULT_CATEGORIES)
-  const { insights } = useInsights(transactions, prevTransactions, budgets, ALL_DEFAULT_CATEGORIES)
+  const { budgets } = useBudget(monthKey, expenseByCategory, parents)
+  const { showDailyToast } = useBudgetAlerts(budgets, categories)
+  const { insights } = useInsights(transactions, prevTransactions, budgets, categories)
   const { upcoming3Days } = useRecurring()
   const navigate = useNavigate()
   const [deleteTarget, setDeleteTarget] = useState(null)
@@ -77,7 +79,7 @@ export function HomePage() {
         <div className="card upcoming-banner animate-fade-in-up" style={{ marginBottom: 16, padding: '12px 16px' }}>
           <div style={{ fontWeight: 700, fontSize: '0.875rem', marginBottom: 8 }}>🔔 Sắp tới</div>
           {upcoming3Days.map((r) => {
-            const cat = getCategoryById(ALL_DEFAULT_CATEGORIES, r.categoryId)
+            const cat = getCategoryById(categories, r.categoryId)
             return (
               <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '4px 0', fontSize: '0.8125rem' }}>
                 <span>{cat.icon} {cat.name}</span>
@@ -107,7 +109,7 @@ export function HomePage() {
       ) : (
         <TransactionList
           dailyGroups={dailyGroups}
-          categories={ALL_DEFAULT_CATEGORIES}
+          categories={categories}
           onEdit={(txn) => navigate(`/edit/${txn.id}`, { state: { transaction: txn } })}
           onDelete={setDeleteTarget}
         />

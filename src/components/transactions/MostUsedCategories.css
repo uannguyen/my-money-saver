@@ -1,7 +1,7 @@
 .most-used-wrapper {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 
 .most-used-header {
@@ -17,7 +17,7 @@
 }
 
 .most-used-title {
-  font-size: 0.875rem;
+  font-size: 0.8125rem;
   font-weight: 600;
   color: var(--color-text-secondary);
 }
@@ -30,15 +30,15 @@
 .most-used-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 7px;
 }
 
 .most-used-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 12px 4px 10px;
+  gap: 5px;
+  padding: 9px 4px 8px;
   border: 1.5px solid var(--color-border-light);
   border-radius: var(--radius-md);
   background: var(--color-surface);
@@ -60,13 +60,13 @@
 }
 
 .most-used-item-icon {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   line-height: 1;
   flex-shrink: 0;
 }
 
 .most-used-item-name {
-  font-size: 0.6875rem;
+  font-size: 0.65rem;
   font-weight: 500;
   color: var(--color-text-secondary);
   text-align: center;

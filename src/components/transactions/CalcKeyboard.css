@@ -4,8 +4,8 @@
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   grid-template-rows: repeat(5, 1fr);
-  gap: 6px;
-  padding: 10px 10px 14px;
+  gap: 5px;
+  padding: 8px 10px 10px;
   background: #f1f2f6;
   border-top: 1px solid #e2e4eb;
   /* prevent rubber-band scroll on iOS when tapping */
@@ -19,11 +19,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 58px;
+  min-height: 50px;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-family: inherit;
-  font-size: 1.3rem;
+  font-size: 1.15rem;
   font-weight: 600;
   cursor: pointer;
   touch-action: manipulation; /* eliminate 300ms tap delay */
@@ -44,7 +44,7 @@
 .calc-key--num {
   background: #ffffff;
   color: #1e1e2e;
-  font-size: 1.3rem;
+  font-size: 1.18rem;
 }
 
 .calc-key--num:hover {
@@ -55,7 +55,7 @@
 .calc-key--op {
   background: #eef0fb;
   color: #6366f1;
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   font-weight: 700;
 }
 
@@ -71,7 +71,7 @@
 .calc-key--fn {
   background: #e8eaf0;
   color: #475569;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.02em;
 }
@@ -84,11 +84,11 @@
 .calc-key--done {
   background: linear-gradient(160deg, #6366f1 0%, #4f52d8 100%);
   color: #ffffff;
-  font-size: 1rem;
+  font-size: 0.95rem;
   font-weight: 700;
   letter-spacing: 0.04em;
   box-shadow: 0 4px 12px rgba(99, 102, 241, 0.40), 0 2px 0 rgba(0,0,0,0.08);
-  border-radius: 14px;
+  border-radius: 12px;
   /* spans rows 4-5 */
   min-height: unset;
 }
